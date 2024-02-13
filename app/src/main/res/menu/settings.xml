@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/open_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Setting" />
+    <item
+        android:id="@+id/site_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Site setting" />
+</menu>

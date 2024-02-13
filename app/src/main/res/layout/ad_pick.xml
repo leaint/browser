@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ad_pick_box"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <View
+        android:id="@+id/ad_pick_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#155BE41D"
+        android:clickable="true"
+        android:longClickable="true"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/ad_pick_tool_box"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_gravity="center_vertical"
+        android:background="#DBFFFFFF"
+        android:clickable="true"
+        android:elevation="5dp"
+        android:focusable="true"
+        android:longClickable="true">
+
+        <ImageView
+            android:id="@+id/ad_pick_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="32dp"
+            android:padding="10dp"
+            android:src="@android:drawable/ic_menu_mylocation" />
+
+        <EditText
+            android:id="@+id/ad_pick_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:ems="10"
+            android:gravity="start|top"
+            android:inputType="text|textMultiLine"
+            android:maxLines="3"
+            android:minLines="2" />
+
+        <Button
+            android:id="@+id/ad_pick_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="父元素" />
+
+        <Button
+            android:id="@+id/ad_pick_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="后退" />
+
+        <ToggleButton
+            android:id="@+id/ad_pick_test_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp" />
+
+        <Button
+            android:id="@+id/ad_pick_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="32dp"
+            android:text="ADD" />
+
+        <ImageView
+            android:id="@+id/ad_pick_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
+    </FrameLayout>
+
+</AbsoluteLayout>

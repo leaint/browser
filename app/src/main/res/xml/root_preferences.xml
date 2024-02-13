@@ -1,0 +1,95 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/basic_header">
+
+        <EditTextPreference
+            android:key="signature"
+            android:title="@string/signature_title" />
+
+        <EditTextPreference
+            android:key="search_url"
+            android:title="@string/search_url" />
+
+        <EditTextPreference
+            android:key="start_page"
+            android:title="@string/start_page" />
+
+
+        <!--        <EditTextPreference-->
+        <!--            android:key="user_agent"-->
+        <!--            android:title="@string/user_agent"-->
+        <!--             />-->
+
+        <ListPreference
+            android:entries="@array/user_agent_keys"
+            android:entryValues="@array/user_agent_values"
+            android:key="user_agent"
+            android:title="@string/default_useragent_str" />
+
+        <EditTextPreference
+            android:inputType="number"
+            android:key="cached_tab_count"
+            android:title="@string/cached_tab_count" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extension_header">
+
+        <!--        <EditTextPreference-->
+        <!--            android:key="block_rule"-->
+        <!--            android:title="@string/block_rule"-->
+        <!--             />-->
+
+        <Preference
+            android:key="ad_rule"
+            android:title="@string/ad_rule"
+            android:fragment="com.example.clock.ui.main.EditFileFragment"
+            android:widgetLayout="@layout/preference_goto" />
+
+        <Preference
+            android:key="user_script"
+            android:title="@string/user_script"
+            android:fragment="com.example.clock.ui.main.EditUserScriptFragment"
+            android:widgetLayout="@layout/preference_goto" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/network_header">
+
+        <SwitchPreference
+            android:key="enable_replace"
+            android:title="@string/replace_title" />
+
+        <Preference
+            android:key="replace_rule"
+            android:title="@string/replace_rule"
+            android:fragment="com.example.clock.ui.main.EditFileFragment"
+            android:widgetLayout="@layout/preference_goto" />
+
+        <EditTextPreference
+            android:key="dns_config"
+            android:title="@string/dns_config_title" />
+
+        <EditTextPreference
+            android:key="custom_dns_list"
+            android:title="@string/custom_dns_title" />
+
+
+        <SwitchPreference
+            android:key="cache_navigation"
+            android:title="@string/cache_navigation_global" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="can_copy"
+            android:title="@string/can_copy_str" />
+
+        <SwitchPreference
+            android:dependency="can_copy"
+            android:key="attachment"
+            android:summaryOff="@string/attachment_summary_off"
+            android:summaryOn="@string/attachment_summary_on"
+            android:title="@string/attachment_title" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

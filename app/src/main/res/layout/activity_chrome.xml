@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The primary full-screen view. This can be replaced with whatever view
+     is needed to present your content, e.g. VideoView, SurfaceView,
+     TextureView, etc. -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ChromeActivity">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/webview_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_webview" />
+
+    <ViewStub
+        android:id="@+id/ad_pick_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/ad_pick"
+        android:visibility="gone" />
+
+    <android.widget.ProgressBar
+        android:id="@+id/loading_bar"
+        style="@android:style/Widget.Holo.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:indeterminateDrawable="@android:color/transparent"
+        android:max="100"
+        android:min="0"
+        android:minHeight="0dp"
+        android:progressDrawable="@drawable/progress_horizontal_holo_dark"
+        android:translationY="-6dip"
+        android:visibility="gone" />
+
+    <com.example.clock.ui.main.GestureAbsoluteLayout
+        android:id="@+id/fullscreen_content_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/view_background">
+
+        <LinearLayout
+            android:id="@+id/toolbar_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/back_button"
+                style="@style/ImageView_Clickable"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+
+                android:src="@drawable/outline_arrow_left_24" />
+
+            <ImageView
+                android:id="@+id/go_button"
+                style="@style/ImageView_Clickable"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:paddingStart="10dp"
+                android:paddingEnd="18dp"
+                android:src="@drawable/outline_arrow_right_24" />
+
+            <FrameLayout
+                android:id="@+id/loading_box"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:focusable="true"
+                android:focusableInTouchMode="true">
+
+
+                <com.example.clock.ui.main.NoWarpEditText
+                    android:id="@+id/url_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:allowClickWhenDisabled="true"
+                    android:background="@android:color/transparent"
+                    android:enabled="false"
+                    android:gravity="center_vertical"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:minHeight="30dp"
+                    android:selectAllOnFocus="true"
+                    android:textColor="@color/black"
+                    tools:text="55555555555" />
+
+            </FrameLayout>
+
+            <android.widget.TextView
+                android:id="@+id/load_refresh_btn"
+                style="@style/Theme.Clock.MyButton"
+                android:layout_width="45dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:clickable="true"
+
+                android:fontFamily="monospace"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:text="Ｏ"
+                android:textAlignment="center" />
+
+            <!--            <android.widget.TextView-->
+            <!--                android:id="@+id/home_btn"-->
+            <!--                style="@style/Theme.Clock.MyButton"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="match_parent"-->
+            <!--                android:layout_weight="0"-->
+
+            <!--                android:clickable="true"-->
+            <!--                android:paddingStart="15dp"-->
+            <!--                android:paddingEnd="15dp"-->
+            <!--                android:text="H" />-->
+
+            <android.widget.TextView
+                android:id="@+id/tablist_btn"
+                style="@style/Theme.Clock.MyButton"
+                android:layout_width="45dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:clickable="true"
+
+                android:fontFamily="monospace"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:text="[0]"
+                android:textAlignment="center" />
+
+            <ImageView
+                android:id="@+id/menu_button"
+                style="@style/ImageView_Clickable"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:src="@drawable/outline_more_vert_24" />
+            <!--                android:text="⋮" -->
+
+        </LinearLayout>
+    </com.example.clock.ui.main.GestureAbsoluteLayout>
+
+    <FrameLayout
+        android:id="@+id/menu_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/fullscreen_content_controls"
+        android:layout_alignParentEnd="true"
+        android:background="#40000000"
+        android:clickable="true"
+        android:minWidth="20dp"
+        android:minHeight="30dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <GridView
+            android:id="@+id/menu_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/view_background"
+            android:numColumns="5"
+
+            android:paddingBottom="10dp"
+            android:scrollbars="none" />
+
+        <!--        <ListView-->
+        <!--            android:id="@+id/menu_list"-->
+        <!--            android:layout_width="150dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_gravity="bottom|end"-->
+        <!--            android:layout_marginEnd="7dp"-->
+        <!--            android:layout_marginBottom="45dp"-->
+        <!--            android:background="@color/white"-->
+        <!--            android:clipToOutline="true"-->
+        <!--            android:elevation="10dp"-->
+        <!--            android:minWidth="100dp"-->
+        <!--            android:outlineProvider="none"-->
+        <!--            android:visibility="gone" />-->
+
+    </FrameLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/url_edit_toolbox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/fullscreen_content_controls"
+        android:background="#40000000"
+        android:gravity="bottom"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ListView
+            android:id="@+id/suggestion_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/url_edit_tool"
+            android:background="@color/view_background"
+            android:stackFromBottom="true"
+            android:transcriptMode="alwaysScroll" />
+
+        <LinearLayout
+            android:id="@+id/url_edit_tool"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:clickable="true"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/expand_btn"
+                style="@style/Theme.Clock.MyButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:background="@color/view_background"
+                android:text="⋀" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/tablist_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/fullscreen_content_controls"
+        android:background="#40000000"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+
+        <ListView
+            android:id="@+id/tab_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="1"
+            android:background="@color/view_background"
+            android:divider="@android:color/transparent"
+            android:fadeScrollbars="false"
+            android:listSelector="@android:color/transparent"
+            android:scrollbars="none"
+            tools:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/add_tab"
+            style="@style/ImageView_Clickable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/view_background"
+            android:minHeight="?android:attr/listPreferredItemHeightSmall"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:src="@drawable/outline_plus_24" />
+    </LinearLayout>
+
+    <ViewStub
+        android:id="@+id/search_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout="@layout/search_box"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/fullscreen_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/toast_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="120dp"
+        android:background="@color/white"
+        android:elevation="2dp"
+        android:padding="2dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/toast_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:maxEms="15"
+            android:maxLines="5"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/toast_action"
+            style="@style/Theme.TextView.Clickable"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:gravity="center"
+            android:minEms="3"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:textColor="#4007A2" />
+    </LinearLayout>
+
+</RelativeLayout>
+
+

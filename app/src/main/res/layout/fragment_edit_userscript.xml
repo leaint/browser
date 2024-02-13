@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.clock.ui.main.PowerEditText xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/edit_userscript"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fontFamily="monospace"
+    android:gravity="top"
+    android:inputType="text|textMultiLine"
+    android:paddingStart="30dp"
+    android:scrollbars="vertical"
+    android:textSize="14sp">
+
+</com.example.clock.ui.main.PowerEditText>

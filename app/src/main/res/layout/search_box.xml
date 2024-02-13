@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/search_box"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#E6FFFFFF">
+
+    <ImageView
+        android:id="@+id/close_search"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        style="@style/ImageView_Clickable"
+        android:src="@drawable/outline_close_24" />
+
+    <EditText
+        android:id="@+id/search_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/search_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:maxLines="1"
+        android:minWidth="40sp"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/black" />
+
+    <ImageView
+        android:id="@+id/prev_search"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        style="@style/ImageView_Clickable"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:src="@drawable/outline_keyboard_arrow_up_24"
+        android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/next_search"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        style="@style/ImageView_Clickable"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:src="@drawable/outline_keyboard_arrow_down_24"
+        android:textAlignment="center" />
+</LinearLayout>

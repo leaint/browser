@@ -1,0 +1,28 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+
+    <string-array name="user_agent_keys">
+        <item>Android</item>
+        <item>iOS</item>
+        <item>Windows Chrome</item>
+        <item>MAC Safari</item>
+    </string-array>
+
+    <string-array name="user_agent_values">
+
+        <item>Mozilla/5.0 (Linux; Android 13.1.1; gsdg 6 Build/gsfsg) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5.6489 Mobile Safari/537.36</item>
+        <item>Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1</item>
+        <item>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.5280.47 Safari/537.36 Edg/97.0.664.52</item>
+        <item>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15</item>
+    </string-array>
+
+</resources>

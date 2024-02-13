@@ -1,0 +1,33 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="enabled"
+        android:summary="Enabled"
+        android:title="Enabled" />
+
+    <PreferenceCategory
+        android:dependency="enabled"
+        android:title="@string/site_settings">
+
+        <ListPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/user_agent_keys"
+            android:entryValues="@array/user_agent_values"
+            android:key="user_agent"
+            android:title="@string/user_agent"
+             />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="cache_navigation"
+            android:title="Cached navigation" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="allow_go_outside"
+            android:title="@string/allow_go_outside" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

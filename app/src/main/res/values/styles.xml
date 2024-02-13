@@ -1,0 +1,33 @@
+<resources>
+
+    <style name="Widget.Theme.Clock.ActionBar.Fullscreen" parent="android:Widget.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="Widget.Theme.Clock.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
+    </style>
+
+    <style name="Theme.TextView.Clickable" parent="android:Widget.TextView">
+        <item name="android:clickable">true</item>
+        <item name="android:longClickable">true</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    </style>
+    <style name="ImageView_Clickable" >
+        <item name="android:clickable">true</item>
+        <item name="android:longClickable">true</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="Theme.Clock.MyButton" parent="Theme.TextView.Clickable">
+        <item name="android:paddingTop">7dp</item>
+        <item name="android:paddingBottom">7dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+
+        <item name="android:textSize">18sp</item>
+    </style>
+
+</resources>
