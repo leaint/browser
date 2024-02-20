@@ -4,7 +4,6 @@ import android.app.Fragment
 import android.database.DataSetObserver
 import android.os.Bundle
 import android.util.ArrayMap
-import android.util.ArraySet
 import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.Menu
@@ -21,71 +20,10 @@ import androidx.core.widget.addTextChangedListener
 import com.example.clock.R
 import com.example.clock.SettingsActivity
 import com.example.clock.settings.GlobalWebViewSetting
+import com.example.clock.ui.model.UserScript
 import java.io.File
 import java.nio.file.Files
 import java.util.UUID
-
-data class UserScript(
-    val name: String,
-    val namespace: String,
-    val match: Set<String>,
-    val content: String
-) {
-    companion object {
-        fun parse(content: String): UserScript? {
-
-            var name: String? = null
-            var nameSpace: String? = null
-            val match = ArraySet<String>()
-
-            var started = false
-            var idx = 1
-            while (idx > 0) {
-
-                val d = content.indexOf('\n', idx)
-                val line = if (d != -1) {
-                    content.subSequence(idx, d)
-                } else {
-                    content.subSequence(idx, content.length)
-                }
-                idx = d + 1
-
-                if (!line.startsWith("//")) {
-                    break
-                }
-
-                if (started) {
-                    if (line.contains("==/UserScript==")) break
-
-                    val atIdx = line.indexOf('@', 1)
-                    if (atIdx < 0) continue
-                    val preLine = line.subSequence(atIdx, line.length)
-                    val item = preLine.split(' ', '\t', limit = 2)
-                    if (item.size == 2) {
-                        when (item[0]) {
-                            "@name" -> name = item[1].trim()
-                            "@namespace" -> nameSpace = item[1].trim()
-                            "@match" -> match.add(item[1].trim())
-                        }
-                    }
-                    continue
-                }
-
-                if (line.contains("==UserScript==")) {
-                    started = true
-                    continue
-                }
-            }
-
-            if (name == null || nameSpace == null || match.isEmpty()) {
-                return null
-            } else {
-                return UserScript(name, nameSpace, match, content)
-            }
-
-        }
-    }
-}
 
 /**
  * A fragment representing a list of Items.

@@ -112,7 +112,7 @@ class HistoryFragment : Fragment() {
                 }
 
                 override fun hasStableIds(): Boolean {
-                    return true;
+                    return true
                 }
 
                 override fun getView(

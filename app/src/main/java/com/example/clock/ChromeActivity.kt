@@ -248,6 +248,7 @@ class ChromeActivity : FragmentActivity() {
 //        window.attributes.fitInsetsTypes = WindowInsets.Type.navigationBars()
 //        actionBar?.setDisplayHomeAsUpEnabled(false)
         actionBar?.hide()
+        window?.decorView?.background = null
 //        binding.root.windowInsetsController?.show(WindowInsets.Type.ime())
         binding.root.setOnApplyWindowInsetsListener { v, insets ->
             run {

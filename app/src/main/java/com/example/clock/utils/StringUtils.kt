@@ -133,7 +133,7 @@ fun translateEscapes(s: String): CharS? {
                 }
 
                 'u' -> {
-                    if (from + 5 >= length) {
+                    if (from + 4 > length) {
                         val msg = String.format(
                             "need four unicode length \\%c \\\\u%04X",
                             ch, ch.code

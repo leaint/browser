@@ -135,7 +135,7 @@ fun initTabListModel(
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        binding.tablistBox.visibility = View.GONE
+        binding.tablistBox.visibility = View.INVISIBLE
 
         var isTranslation = false
 
@@ -232,7 +232,7 @@ fun initTabListModel(
             }
 
             override fun hasStableIds(): Boolean {
-                return true;
+                return true
             }
 
 
@@ -410,7 +410,7 @@ fun initTabListModel(
         override fun onCloseTabList() {
             if (binding.tablistBox.visibility == View.VISIBLE) {
                 binding.tablistBox.animate().alpha(0f).withEndAction {
-                    binding.tablistBox.visibility = View.GONE
+                    binding.tablistBox.visibility = View.INVISIBLE
                     binding.tablistBox.alpha = 1f
                 }
 

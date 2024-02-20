@@ -2,14 +2,10 @@ package com.example.clock.ui.model
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.ArrayMap
 import android.util.JsonReader
 import android.util.JsonWriter
 import com.example.clock.settings.obj
 import com.example.clock.utils.IJSONOpt
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier
-import kotlin.reflect.typeOf
 
 class SiteSetting(
     @JvmField

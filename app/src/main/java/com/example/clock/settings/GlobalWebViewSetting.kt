@@ -15,7 +15,7 @@ import com.example.clock.R
 import com.example.clock.SettingsFragment
 import com.example.clock.SiteSettingsFragment
 import com.example.clock.internal.J
-import com.example.clock.ui.main.UserScript
+import com.example.clock.ui.model.UserScript
 import com.example.clock.ui.main.UserScriptFragment
 import com.example.clock.ui.model.BookMark
 import com.example.clock.ui.model.SiteSetting
@@ -218,7 +218,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
             JsonReader(buf.inputStream().reader()).use {
                 it.obj { k ->
                     run {
-                        SiteSetting().parseJSON(this)?.let {
+                        SiteSetting().parseJSON(this).let {
                             arr[k] = it
                         }
                     }

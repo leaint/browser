@@ -392,7 +392,7 @@ class MyWebViewClient(
                 for (l in it.rules) {
                     if (J.endsWith(host, l)) {
                         res = it.filterFunc(request, globalWebViewSetting)
-                        break;
+                        break
                     }
                 }
                 if (res != null) {

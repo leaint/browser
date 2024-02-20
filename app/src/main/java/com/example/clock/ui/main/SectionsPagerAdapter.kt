@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.clock.R
 
-public val TAB_TITLES = arrayOf(
+val TAB_TITLES = arrayOf(
     R.string.tab_text_1,
     R.string.tab_text_2
 )

@@ -85,7 +85,7 @@ class BookMark(
 
 class BookMarkModel(private val setting: GlobalWebViewSetting) {
 
-    var arr = setting.bookMarkArr
+    private var arr = setting.bookMarkArr
 
     init {
         setting.addChangedListener { t ->

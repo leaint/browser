@@ -152,7 +152,7 @@ class URLSuggestionModel(
                 if (url.indexOf(s) != -1 || title.indexOf(s) != -1) {
                     arr.add(
                         SuggestItem(
-                            1, url, title ?: url
+                            1, url, title
                         )
                     )
                 }
