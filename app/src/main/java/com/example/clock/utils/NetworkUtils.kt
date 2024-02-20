@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import com.example.clock.internal.DnsPacket
+import com.example.clock.settings.ignore
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
@@ -327,6 +328,48 @@ class ConnHelper {
             }
 
             return Result.success(urlConn)
+
+        }
+
+        fun wrongResponse(urlConn: HttpURLConnection): Result<InputStream> {
+
+            try {
+                ignore {
+                    urlConn.inputStream.close()
+                }
+
+                val sbuf = StringBuilder(1024)
+                sbuf.append(
+                    """              
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>"""
+                )
+
+                sbuf.append("<p>").append(urlConn.responseCode).append(' ')
+                    .append(urlConn.responseMessage)
+                    .append("</p>")
+                for (header in urlConn.headerFields) {
+                    sbuf.append("<p>").append(header.key).append(": ")
+                        .append(header.value.joinToString(","))
+                        .append("</p>")
+                }
+
+                sbuf.append("</body></html>")
+                val stream = ByteArrayInputStream(
+                    sbuf.toString().toByteArray()
+                )
+
+                return Result.success(stream)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return Result.failure(e)
+            }
 
         }
     }

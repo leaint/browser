@@ -77,7 +77,7 @@ object WebRequestFilter {
     var webRequestFilter = arrayOf(
         RequestFilter(arrayOf("moyu.im"), ::moyuFilter),
         RequestFilter(
-            arrayOf(".reddit.com", ".redditstatic.com", ".redditmedia.com"),
+            arrayOf(".reddit.com", ".redd.it", ".redditstatic.com", ".redditmedia.com"),
             ::redditFilter
         ),
         RequestFilter(
@@ -216,47 +216,86 @@ object WebRequestFilter {
 
                 val reddit = URL(url.scheme, "[$ip]", 443, urlPath)
 
-
                 val urlConn = reddit.openConnection() as HttpsURLConnection
 
                 urlConn.apply {
+                    instanceFollowRedirects = false
                     request.requestHeaders.forEach { (t, u) ->
-                        setRequestProperty(t, u)
+                        if (t != "Accept-Encoding")
+                            setRequestProperty(t, u)
                     }
                     setRequestProperty("host", host)
-                    setRequestProperty("X-Android-Transports", "h2,http/1.1")
+                    setRequestProperty("Cache-Control", "max-stale=300")
+                    setRequestProperty(
+                        "Accept-Language",
+                        "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"
+                    )
                 }
 
                 urlConn.hostnameVerifier =
                     HostnameVerifier { hostname, session -> true }
 
-
                 val responseHeaders = ArrayMap<String, String>()
 
-                val bufStream = urlConn.inputStream
+                val responseCode = urlConn.responseCode
 
-                var mime = "text/html"
-                val mimetype = urlConn.headerFields["content-type"]
-                if (mimetype != null) {
-                    val responseMime = mimetype.getOrNull(0)
-                    if (responseMime != null) {
-                        val arr = responseMime.split(';')
-                        mime = arr[0]
+                if (responseCode !in 300..399 || !request.isForMainFrame) {
+
+                    if (responseCode in 200..299) {
+                        val bufStream = urlConn.inputStream
+
+                        var mime = "text/html"
+                        val mimetype = urlConn.headerFields["content-type"]
+                        if (mimetype != null) {
+                            val responseMime = mimetype.getOrNull(0)
+                            if (responseMime != null) {
+                                val arr = responseMime.split(';')
+                                mime = arr[0]
+                            }
+                        }
+
+                        urlConn.headerFields.forEach { (k, l) ->
+                            if (k != null) responseHeaders[k] = l.joinToString()
+                        }
+
+                        return WebResourceResponse(
+                            mime,
+                            "utf-8",
+                            urlConn.responseCode,
+                            urlConn.responseMessage,
+                            responseHeaders,
+                            bufStream
+                        )
+                    } else {
+                        val bufStream =
+                            ConnHelper.wrongResponse(urlConn)
+                                .getOrDefault(EmptyInputStream)
+                        return WebResourceResponse(
+                            "text/html",
+                            "utf-8",
+                            200,
+                            "OK",
+                            emptyMap(),
+                            bufStream
+                        )
                     }
-                }
+                } else {
+                    val bufStream =
+                        ConnHelper.autoRedirect2(urlConn)
+                            .getOrDefault(
+                                ConnHelper.wrongResponse(urlConn)
+                                    .getOrDefault(EmptyInputStream)
+                            )
+                    return WebResourceResponse(
+                        "text/html",
+                        "utf-8",
+                        200,
+                        "OK",
+                        emptyMap(),
+                        bufStream
+                    )
 
-                urlConn.headerFields.forEach { (k, l) ->
-                    if (k != null) responseHeaders[k] = l.joinToString()
                 }
-
-                return WebResourceResponse(
-                    mime,
-                    "utf-8",
-                    urlConn.responseCode,
-                    urlConn.responseMessage,
-                    responseHeaders,
-                    bufStream
-                )
             }
         }
 
