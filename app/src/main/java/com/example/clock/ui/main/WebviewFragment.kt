@@ -246,7 +246,6 @@ class WebviewFragment : Fragment() {
                         }
                         uiModelListener.runOnUiThread {
 
-
                             with(AlertDialog.Builder(context)) {
                                 setTitle("Download a file?")
                                 setMessage(msg)
@@ -260,12 +259,26 @@ class WebviewFragment : Fragment() {
                                     )
                                 }
                                 setNegativeButton(android.R.string.cancel, null)
+                                setNeutralButton(R.string.copy_link, null)
+
                                 create()
 
                             }.let {
                                 it.window?.decorView?.windowInsetsController?.hide(WindowInsets.Type.navigationBars())
                                 it.setCanceledOnTouchOutside(false)
                                 it.show()
+                                it.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener { _ ->
+                                    run {
+                                        val clipboard =
+                                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        clipboard.setPrimaryClip(
+                                            ClipData.newPlainText(
+                                                "WebView",
+                                                url
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

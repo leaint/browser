@@ -1,15 +1,9 @@
 package com.example.clock
 
-//import androidx.preference.PreferenceManager
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.SearchManager
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.net.http.HttpResponseCache
 import android.os.Bundle
 import android.os.Handler
@@ -21,18 +15,13 @@ import android.os.StrictMode.VmPolicy
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.ActionMode
-import android.view.GestureDetector
-import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.Menu
-import android.view.MotionEvent
 import android.view.RoundedCorner
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowInsets
-import android.webkit.JavascriptInterface
-import android.webkit.URLUtil
 import android.webkit.WebStorage
 import android.webkit.WebView
 import android.widget.AdapterView
@@ -45,35 +34,26 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.core.view.updateLayoutParams
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
 import com.example.clock.databinding.ActivityChromeBinding
 import com.example.clock.databinding.AdPickBinding
 import com.example.clock.databinding.SearchBoxBinding
 import com.example.clock.internal.J
 import com.example.clock.settings.GlobalWebViewSetting
 import com.example.clock.settings.ignore
-import com.example.clock.tab.manager.ChangedListener
-import com.example.clock.tab.manager.GroupHolderListener
 import com.example.clock.tab.manager.GroupWebViewHolder
 import com.example.clock.tab.manager.HolderController
-import com.example.clock.tab.manager.ShadowWebViewHolder
 import com.example.clock.tab.manager.WebViewHolder
 import com.example.clock.ui.main.LoadDataUrl
-import com.example.clock.ui.main.MyWebView
 import com.example.clock.ui.main.TAB_TITLES
 import com.example.clock.ui.main.WebViewTransport
-import com.example.clock.ui.main.WebviewFragment
-import com.example.clock.ui.main.WebviewFragment.Companion.initWebView
 import com.example.clock.ui.model.ADPickModel
 import com.example.clock.ui.model.BookMarkModel
+import com.example.clock.ui.model.ExclusiveModel
 import com.example.clock.ui.model.MainMenuEventListener
 import com.example.clock.ui.model.MainMenuModel
 import com.example.clock.ui.model.MenuEnum
+import com.example.clock.ui.model.NavigationChangedModel
 import com.example.clock.ui.model.SearchModel
 import com.example.clock.ui.model.TabListModel
 import com.example.clock.ui.model.ToolBarModel
@@ -82,15 +62,14 @@ import com.example.clock.ui.model.UIModelListener
 import com.example.clock.ui.model.URLEditBarModel
 import com.example.clock.ui.model.URLSuggestionModel
 import com.example.clock.ui.model.initAdPickModel
+import com.example.clock.ui.model.initFragmentListener
 import com.example.clock.ui.model.initSearchModel
 import com.example.clock.ui.model.initTabListModel
+import com.example.clock.ui.model.initTabModel
 import com.example.clock.ui.model.initToolBarModel
 import com.example.clock.ui.model.initURLEditModel
 import com.example.clock.utils.HistoryManager
-import com.example.clock.utils.MyJSInterface
 import com.example.clock.utils.MyToast
-import com.example.clock.utils.MyWebChromeClient
-import com.example.clock.utils.MyWebViewClient
 import com.example.clock.utils.SafeURI
 import com.example.clock.utils.translateEscapes
 import com.google.zxing.integration.android.IntentIntegrator
@@ -100,35 +79,26 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.lang.ref.WeakReference
 import java.net.CookieHandler
 import java.net.CookieManager
-import java.util.LinkedList
-import kotlin.jvm.internal.Ref.ObjectRef
 
 class ChromeActivity : FragmentActivity() {
 
     private val delayLoadingHandler = object : Handler(Looper.myLooper()!!) {
 
         override fun handleMessage(msg: Message) {
-
-            when (msg.what) {
-                1 -> {
-                    when (val obj = msg.obj) {
-                        is WebViewTransport -> {
-                            val data = obj.data
-                            if (data is LoadDataUrl) {
-                                holderController.findHolder(obj.uuid)?.webView?.get()
-                                    ?.loadDataWithBaseURL(
-                                        data.baseUrl,
-                                        data.data,
-                                        data.mimeType,
-                                        data.encoding,
-                                        data.historyUrl
-                                    )
-                            }
-                        }
-                    }
+            val obj = msg.obj
+            if (msg.what == 1 && obj is WebViewTransport) {
+                val data = obj.data
+                if (data is LoadDataUrl) {
+                    holderController.findHolder(obj.uuid)?.webView?.get()
+                        ?.loadDataWithBaseURL(
+                            data.baseUrl,
+                            data.data,
+                            data.mimeType,
+                            data.encoding,
+                            data.historyUrl
+                        )
                 }
             }
         }
@@ -141,8 +111,6 @@ class ChromeActivity : FragmentActivity() {
     private lateinit var setting: GlobalWebViewSetting
 
     private lateinit var historyManager: HistoryManager
-
-    private lateinit var myJSInterface: MyJSInterface
 
     private val searchModel = SearchModel()
 
@@ -161,8 +129,6 @@ class ChromeActivity : FragmentActivity() {
     private lateinit var urlSuggestionModel: URLSuggestionModel
 
     private lateinit var binding: ActivityChromeBinding
-
-//    private lateinit var toastView: View
 
     private lateinit var settingLauncher: ActivityResultLauncher<Intent>
 
@@ -186,8 +152,6 @@ class ChromeActivity : FragmentActivity() {
 
     private val holderController = HolderController()
 
-    private val cachedWebViewFragment = LinkedList<ShadowWebViewHolder>()
-
     private val startHistory =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             it.data?.extras?.let {
@@ -202,30 +166,9 @@ class ChromeActivity : FragmentActivity() {
             }
         }
 
-    private val clipboardJSInterface = object {
+    private val navigationChangedModel = NavigationChangedModel()
 
-        @JavascriptInterface
-        fun writeText(s: String?) {
-            if (!s.isNullOrEmpty()) runOnUiThread {
-                uiModel.makeToast("$s", MyToast.LENGTH_LONG).setAction("Copy") {
-                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("WebView", s))
-                }.show()
-
-            }
-        }
-
-        @JavascriptInterface
-        fun back() {
-            runOnUiThread {
-                uiModel.goBackOrClose()
-            }
-        }
-    }
-
-    private val navigationChangedCallback = ArrayList<() -> Unit>()
-
-    private val exclusiveModelCallback: ObjectRef<Pair<Int, (() -> Unit)>?> = ObjectRef()
+    private val exclusiveModel = ExclusiveModel()
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -240,13 +183,6 @@ class ChromeActivity : FragmentActivity() {
 
     private lateinit var loadSettingJob: Job
 
-    private lateinit var readModeGestureDetector: GestureDetector
-
-    init {
-//        enableStrictMode()
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableStrictMode()
@@ -299,25 +235,12 @@ class ChromeActivity : FragmentActivity() {
 
         }
 
-        myJSInterface = object : MyJSInterface() {
-            @JavascriptInterface
-            override fun getSearchUrl(): String = setting.search_url
-
-            @JavascriptInterface
-            override fun getBookMarks(): String = setting.bookMarkStr
-
-            @JavascriptInterface
-            override fun setBookMarks(s: String) {
-                setting.bookMarkStr = s
-            }
-        }
         run {
             val g = GroupWebViewHolder()
             val h = WebViewHolder("about:blank", newTask = true)
             g.addTab(h)
             holderController.add(g)
         }
-
 
 //        window.insetsController?.hide(WindowInsets.Type.systemBars())
 
@@ -357,15 +280,6 @@ class ChromeActivity : FragmentActivity() {
             override fun onViewDetachedFromWindow(v: View) {}
         })
 
-//        toastView =  binding.toastBox
-//         = findViewById(R.id.toast_box)
-
-        initFragmentListener()
-
-        initMenuModel()
-
-        initTabModel()
-
         uiModel = UIModel(
             this,
             holderController,
@@ -374,6 +288,26 @@ class ChromeActivity : FragmentActivity() {
             toolBarModel,
             binding,
             searchModel,
+        )
+
+        initFragmentListener(
+            holderController,
+            supportFragmentManager,
+            this,
+            setting,
+            uiModel,
+            loadSettingJob,
+            mainScope,
+            historyManager,
+        )
+
+        initMenuModel()
+
+        initTabModel(
+            holderController,
+            navigationChangedModel,
+            uiModel,
+            binding,
         )
 
         uiModel.requestFullscreen(setting.isFullScreen)
@@ -386,7 +320,7 @@ class ChromeActivity : FragmentActivity() {
             uiModel,
             setting,
             holderController,
-            exclusiveModelCallback
+            exclusiveModel
         )
 
         initURLEditModel(
@@ -394,7 +328,7 @@ class ChromeActivity : FragmentActivity() {
             this,
             binding,
             urlEditModel,
-            exclusiveModelCallback,
+            exclusiveModel,
             uiModel,
             toolBarModel,
             holderController,
@@ -450,7 +384,7 @@ class ChromeActivity : FragmentActivity() {
                 initSearchModel(
                     SearchBoxBinding.bind(inflated),
                     searchModel,
-                    navigationChangedCallback,
+                    navigationChangedModel,
                     holderController,
                     uiModel
                 )
@@ -458,131 +392,23 @@ class ChromeActivity : FragmentActivity() {
         }
     }
 
-    private fun initFragmentListener() {
-        supportFragmentManager.commit {
-            val curGroup = holderController.currentGroup
-            val webViewHolder = curGroup?.getCurrent() ?: throw Exception("empty group")
+    private fun enableStrictMode() {
 
-            add<WebviewFragment>(R.id.webview_box, webViewHolder.uuidString)
-        }
-
-        val width = resources.displayMetrics.widthPixels
-        val gap = (width * 0.2).toInt()
-        readModeGestureDetector = GestureDetector(this, object : SimpleOnGestureListener() {
-
-            val height = resources.displayMetrics.heightPixels
-            val density = resources.displayMetrics.density
-            val marginLeft = (width * 0.4).toInt()
-            val marginRight = (width * 0.6).toInt()
-
-            override fun onSingleTapUp(e: MotionEvent): Boolean {
-
-                if (setting.read_mode) {
-                    when (e.x.toInt()) {
-                        in 0..marginLeft -> {
-                            holderController.currentGroup?.getCurrent()?.webView?.get()?.let {
-                                val to = it.scrollY - height
-                                it.scrollY = to.coerceAtLeast(0)
-                            }
-                        }
-
-                        in marginRight..width -> {
-                            holderController.currentGroup?.getCurrent()?.webView?.get()?.let {
-                                val to = it.scrollY + height
-                                it.scrollY =
-                                    to.coerceAtMost((it.contentHeight * density - height).toInt())
-                            }
-                        }
-
-                        else -> {}
-                    }
-                    return true
-                }
-
-                return super.onSingleTapUp(e)
-            }
-
-            override fun onFling(
-                e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float
-            ): Boolean {
-
-                uiModel.onToolbarFling(e1, e2, velocityX, velocityY)
-                return super.onFling(e1, e2, velocityX, velocityY)
-            }
-        })
-        val marL = (width - gap) / 2
-        val marR = marL + gap
-
-        fun readModeOnTouch(v: View, event: MotionEvent): Boolean {
-
-            readModeGestureDetector.onTouchEvent(event)
-
-            return if (setting.read_mode) {
-                if (event.x.toInt() in marL..marR) {
-                    false
-                } else {
-                    setting.read_mode
-                }
-            } else {
-                false
-            }
-        }
-
-        var webViewClient: MyWebViewClient? = null
-        var webChromeClient: MyWebChromeClient? = null
-
-        supportFragmentManager.registerFragmentLifecycleCallbacks(object :
-            FragmentLifecycleCallbacks() {
-
-            override fun onFragmentViewCreated(
-                fm: FragmentManager, f: Fragment, v: View, savedInstanceState: Bundle?
-            ) {
-
-                v.findViewById<MyWebView>(R.id.webview)?.let {
-                    val h: WebViewHolder? = holderController.findHolder(f.tag)
-
-                    if (h != null) {
-                        val msg = h.initMsg
-                        initWebView(
-                            this@ChromeActivity,
-                            uiModel,
-                            setting,
-                            it,
-                            h.uuid,
-                            msg != null
-                        )
-
-                        it.setOnTouchListener(::readModeOnTouch)
-
-                        h.webView = WeakReference(it)
-
-                        if (loadSettingJob.isActive) {
-                            mainScope.launch {
-                                loadSettingJob.join()
-                                webViewClient = MyWebViewClient(uiModel, setting)
-                                webChromeClient =
-                                    MyWebChromeClient(uiModel, setting, historyManager)
-                                it.webViewClient = webViewClient!!
-                                it.webChromeClient = webChromeClient
-
-                                it.settings.userAgentString = setting.user_agent
-
-                                initFragment(it, h)
-                            }
-                        } else {
-                            it.webViewClient = webViewClient!!
-                            it.webChromeClient = webChromeClient!!
-                            initFragment(it, h)
-                        }
-                    }
-                }
-            }
-
-        }, false)
-
+        StrictMode.setThreadPolicy(ThreadPolicy.Builder().detectAll().penaltyLog().build())
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder().detectAll().setClassInstanceLimit(this.javaClass, 1).penaltyLog()
+                .build()
+        )
     }
 
-    private fun initMenuModel() {
+    fun initMenuModel(
+//        mainMenuModel: MainMenuModel,
+//        fragmentActivity: FragmentActivity,
+//        bookMarkModel: BookMarkModel,
+//        holderController: HolderController,
+//        binding: ActivityChromeBinding,
+//        exclusiveModel: ExclusiveModel,
+    ) {
 
         val callback = object : OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
@@ -622,13 +448,16 @@ class ChromeActivity : FragmentActivity() {
 
         mainMenuModel.mainMenuEventListener = object : MainMenuEventListener {
             override fun onMenuShow() {
-                printDebugInfo()
+//            printDebugInfo(
+//                holderController,
+//                fragmentActivity.supportFragmentManager,
+//
+//            )
 
-                exclusiveModelCallback.element?.let {
-                    if (it.first != mainMenuModel.hashCode()) {
-                        it.second()
-                    }
-                }
+                exclusiveModel.doAndAddCallback(
+                    mainMenuModel.hashCode(), mainMenuModel.hashCode() to mainMenuModel::hideMenu
+                )
+
 
 //                if (tabListModel.isShown) {
 //                    tabListModel.closeTabList()
@@ -645,8 +474,6 @@ class ChromeActivity : FragmentActivity() {
                 }
                 binding.menuBox.visibility = View.VISIBLE
 
-                exclusiveModelCallback.element =
-                    mainMenuModel.hashCode() to mainMenuModel::hideMenu
 //                binding.menuBox.animate().alpha(1)
             }
 
@@ -655,11 +482,8 @@ class ChromeActivity : FragmentActivity() {
                     binding.menuBox.visibility = View.INVISIBLE
                     binding.menuBox.alpha = 1f
                 }
-                exclusiveModelCallback.element?.let {
-                    if (it.first == mainMenuModel.hashCode()) {
-                        exclusiveModelCallback.element = null
-                    }
-                }
+                exclusiveModel.cancelCallback(mainMenuModel.hashCode())
+
             }
 
             override fun onMenuUpdate() {
@@ -675,14 +499,7 @@ class ChromeActivity : FragmentActivity() {
                     }
 
                 }
-//                menuTitleMap.withIndex().asSequence()
-//                    .filter { it.value != null }
-//                    .forEach { oit ->
-//                        menuGrid.getChildAt(oit.index)
-//                            ?.findViewById<TextView>(R.id.text1)?.let {
-//                                oit.value!!(h, it)
-//                            }
-//                    }
+
             }
 
             override fun onItemClick(
@@ -699,10 +516,6 @@ class ChromeActivity : FragmentActivity() {
             }
             visibility = View.INVISIBLE
         }
-
-//        val menuAdapter =
-//            ArrayAdapter(this, R.layout.simple_listview_item, MenuEnum.values().map { it.title })
-//
 
         binding.menuGrid.apply {
             adapter = object : ArrayAdapter<String>(this@ChromeActivity,
@@ -730,257 +543,9 @@ class ChromeActivity : FragmentActivity() {
             onItemClickListener = mainMenuModel.mainMenuEventListener
 
         }
-//
-//        binding.menuList.apply {
-//
-//            setOnFocusChangeListener { v, hasFocus ->
-//                if (!hasFocus) mainMenuModel.hideMenu()
-//            }
-////            adapter = menuAdapter
-//
-////            onItemClickListener = mainMenuModel.mainMenuEventListener
-//
-//        }
-
 
         binding.menuButton.setOnClickListener {
-            mainMenuModel.toogleMemu()
-        }
-
-    }
-
-    private fun initTabModel() {
-        holderController.changedListener = object : ChangedListener {
-            override fun onTabRemoved() {
-                clearNavigationChangedCallback()
-            }
-
-            override fun onTabAdded() {
-                clearNavigationChangedCallback()
-            }
-
-            override fun onTabReplaced() {}
-
-            override fun onTabSelected(oldV: Int, newV: Int) {
-                this@ChromeActivity.onTabDataChanged()
-            }
-
-            override fun onTabDataChanged(
-                h: WebViewHolder, g: GroupWebViewHolder, changedType: Int
-            ) {
-
-                if (holderController.currentGroup?.getCurrent() == h && holderController.showLength == holderController.size) {
-                    uiModel.updateUI(h, g, changedType)
-                }
-            }
-
-        }
-
-        holderController.groupHolderListener = object : GroupHolderListener {
-
-            override fun onTabGroupSelected(
-                oldG: Int, newG: Int
-            ) {
-                binding.tabList.setItemChecked(newG, true)
-
-                onTabDataChanged()
-            }
-
-            override fun onTabGroupRemoved(position: Int) {
-                clearNavigationChangedCallback()
-            }
-
-            override fun onTabGroupAdded() {
-                if (holderController.size > 1) binding.tablistBtn.animate()
-                    .translationY(-binding.tablistBtn.height * 0.2f)
-
-                clearNavigationChangedCallback()
-            }
-
-            override fun onReloadTabInProxy() {
-
-                val curGroup = holderController.currentGroup
-
-                val webViewHolder = curGroup?.getCurrent() ?: throw KotlinNullPointerException()
-
-                if (webViewHolder.isLoading) {
-                    webViewHolder.webView?.get()?.stopLoading()
-
-                    webViewHolder.change {
-                        it.progress = 100
-                        it.isLoading = false
-                    }
-                } else {
-                    webViewHolder.webView?.get()?.reload()
-                }
-            }
-
-            override fun onLoadUrl(url: String) {
-                val curGroup = holderController.currentGroup
-
-                val webViewHolder = curGroup?.getCurrent() ?: throw KotlinNullPointerException()
-                webViewHolder.webView?.get()?.loadUrl(url)
-            }
-        }
-
-    }
-
-    private fun enableStrictMode() {
-
-        StrictMode.setThreadPolicy(ThreadPolicy.Builder().detectAll().penaltyLog().build())
-        StrictMode.setVmPolicy(
-            VmPolicy.Builder().detectAll().setClassInstanceLimit(this.javaClass, 1).penaltyLog()
-                .build()
-        )
-    }
-
-    private fun printDebugInfo() {
-
-        Log.d("group", J.repeat("-", 10))
-        for (i in holderController.indices) {
-            val k = holderController[i].groupArr
-            var ii = "$i -"
-            for (j in k.indices) {
-                val star = if (j == holderController[i].curIdx) {
-                    "**"
-                } else {
-                    "  "
-                }
-                Log.d("group", "$ii $j $star\t${k[j].title} ${k[j].uuid}")
-                ii = "  |"
-            }
-        }
-
-        Log.d("cachedFragment", J.repeat("=", 5))
-        for (i in cachedWebViewFragment) {
-            Log.d("cachedFragment", i.uuidString)
-        }
-
-        supportFragmentManager.fragments.forEach {
-
-            val vis = if (it.isVisible) {
-                "Visible"
-            } else {
-                "\t"
-            }
-
-            val resume = if (it.isResumed) {
-                "resumed"
-            } else {
-                "stopped"
-            }
-            val cached = if (cachedWebViewFragment.none { i -> i.uuidString == it.tag }) {
-                "\t"
-            } else {
-                "cached"
-            }
-            Log.d("group", "${it.tag}\t$resume\t$vis\t$cached")
-        }
-
-    }
-
-    fun clearNavigationChangedCallback() {
-        navigationChangedCallback.forEach {
-            ignore {
-                it()
-            }
-        }
-        navigationChangedCallback.clear()
-    }
-
-    fun onTabDataChanged() {
-        clearNavigationChangedCallback()
-
-        uiModel.updateUI()
-    }
-
-
-    private fun restoreTabGroup() {
-
-        supportFragmentManager
-        if (holderController.restoreGroupHolder.hs.isEmpty() || holderController.restoreGroupHolder.hs.size != holderController.restoreGroupHolder.hb.size) return
-        val g = GroupWebViewHolder()
-        for (i in holderController.restoreGroupHolder.hs.indices) {
-            val hsi = holderController.restoreGroupHolder.hs[i]
-            val hbi = holderController.restoreGroupHolder.hb[i]
-            g.groupArr.add(WebViewHolder(hsi, startLoadingUri = hsi).apply {
-                dummy = true
-                savedState = hbi
-            })
-
-        }
-        g.curIdx = holderController.restoreGroupHolder.curIdx
-        holderController.restoreGroupHolder.hs.clear()
-        holderController.restoreGroupHolder.hb.clear()
-        holderController.restoreGroupHolder.curIdx = 0
-
-        g.changedListener = holderController
-
-        val toShowHolder = g.getCurrent()!!
-
-        val curH = holderController.currentGroup?.getCurrent() ?: throw KotlinNullPointerException()
-        holderController.add(g, 0)
-
-        supportFragmentManager.commit {
-            supportFragmentManager.findFragmentByTag(curH.uuidString)?.let {
-                hide(it)
-            }
-
-            add<WebviewFragment>(R.id.webview_box, toShowHolder.uuidString)
-
-        }
-        tabListModel.updateUI()
-    }
-
-    private fun initFragment(it: WebView, h: WebViewHolder) {
-        if (URLUtil.isAssetUrl(h.loadingUrl)) it.addJavascriptInterface(
-            myJSInterface, "Android"
-        )
-        it.addJavascriptInterface(clipboardJSInterface, "MyHistory")
-
-        val msg = h.initMsg
-        if (msg != null) {
-            // 即便设置了userAgentString，请求时useragent仍为默认值
-//            it.settings.userAgentString = setting.user_agent
-            when (val obj = msg.obj) {
-                is WebView.WebViewTransport -> {
-                    obj.webView = it
-                }
-
-                is WebViewTransport -> {
-                    obj.uuid = h.uuid
-                }
-            }
-//            val tr = msg.obj as? WebView.WebViewTransport
-//            tr?.webView = it
-            msg.sendToTarget()
-        } else {
-            ignore {
-                val u = Uri.parse(h.loadingUrl)
-                val ua = setting.siteSettings[u.authority]?.user_agent
-
-                if (ua != null) {
-                    if (it.settings.userAgentString != ua) {
-                        it.settings.userAgentString = ua
-                    }
-                } else {
-                    it.settings.userAgentString = setting.user_agent
-                }
-                if (h.pc_mode) {
-//                    it.settings.useWideViewPort = false
-//                    it.settings.loadWithOverviewMode = false
-                    it.settings.userAgentString = setting.pc_user_agent
-                }
-            }
-            val savedState = h.savedState
-            if (savedState != null) {
-                it.restoreState(savedState)
-                h.savedState = null
-            } else {
-                it.loadUrl(h.loadingUrl)
-            }
-
-
+            mainMenuModel.toggleMenu()
         }
     }
 
@@ -1150,7 +715,7 @@ class ChromeActivity : FragmentActivity() {
 
             MenuEnum.VIEW_CURRENT_SOURCE.ordinal -> {
                 holderController.currentGroup?.getCurrent()?.webView?.get()
-                    ?.evaluateJavascript("document.documentElement.outerHTML") {
+                    ?.evaluateJavascript(" document.documentElement.outerHTML") {
 
                         mainScope.launch(Dispatchers.IO) {
 
@@ -1172,7 +737,13 @@ class ChromeActivity : FragmentActivity() {
                                 val msg = delayLoadingHandler.obtainMessage(
                                     1, WebViewTransport(
                                         LoadDataUrl(
-                                            null, s, "text/plain", null, null
+                                            null,
+                                            "<html><head><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css\">\n" +
+                                                    "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js\"></script>\n" +
+                                                    "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js\"></script>\n</head><body><pre><code class=\"language-html\"></code></pre><xmp id=\"temp\" type=\"text/html\">" + s + "</xmp><script>let a = document.querySelector('code');let b = document.querySelector('#temp'); a.textContent = b.innerHTML;b.remove(); hljs.highlightAll();</script></body></html>",
+                                            "text/html",
+                                            null,
+                                            null
                                         )
                                     )
                                 )
@@ -1243,7 +814,7 @@ class ChromeActivity : FragmentActivity() {
             }
 
             MenuEnum.RESTORE_TAB.ordinal -> {
-                restoreTabGroup()
+                uiModel.restoreTabGroup()
             }
 
             MenuEnum.EXIT.ordinal -> finish()
@@ -1254,6 +825,8 @@ class ChromeActivity : FragmentActivity() {
                     val intentIntegrator = IntentIntegrator(this)
 
                     val alertDialog = intentIntegrator.initiateScan(IntentIntegrator.QR_CODE_TYPES)
+
+                    alertDialog?.show()
                 }
             }
 
@@ -1270,7 +843,6 @@ class ChromeActivity : FragmentActivity() {
             mainMenuModel.hideMenu()
 
         }
-
     }
 
     @Deprecated("Deprecated in Java")
@@ -1347,5 +919,4 @@ class ChromeActivity : FragmentActivity() {
             }
         }
     }
-
 }

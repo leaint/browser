@@ -140,7 +140,7 @@ class SearchModel {
 
 fun initSearchModel(
     binding: SearchBoxBinding, searchModel: SearchModel,
-    navigationChangedCallback: ArrayList<() -> Unit>,
+    navigationChangedModel: NavigationChangedModel,
     holderController: HolderController,
     uiModelListener: UIModelListener
 ) {
@@ -162,7 +162,7 @@ fun initSearchModel(
                 visibility = View.VISIBLE
                 animate().alpha(1f)
             }
-            navigationChangedCallback.add {
+            navigationChangedModel.add {
                 searchModel.isShown = false
             }
 

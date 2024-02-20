@@ -33,6 +33,8 @@ import com.example.clock.databinding.ActivityChromeBinding
 import com.example.clock.internal.J
 import com.example.clock.settings.GlobalWebViewSetting
 import com.example.clock.settings.ignore
+import com.example.clock.tab.manager.ChangedListener
+import com.example.clock.tab.manager.GroupHolderListener
 import com.example.clock.tab.manager.GroupWebViewHolder
 import com.example.clock.tab.manager.HolderController
 import com.example.clock.tab.manager.ShadowWebViewHolder
@@ -61,6 +63,7 @@ interface UIModelListener : FindListener {
     fun newGroupTab(initUrl: String, initMsg: Message? = null, background: Boolean = false)
     fun goToSpecialURL(url: String)
     fun clearForwardTab(tag: Int)
+    fun restoreTabGroup()
     fun setFullScreenViewStatus(view: View?, hidden: Boolean)
     fun updateUI(isNative: Boolean = false)
     fun updateUI(
@@ -671,6 +674,43 @@ class UIModel(
         }
     }
 
+    override fun restoreTabGroup() {
+
+        if (holderController.restoreGroupHolder.hs.isEmpty() || holderController.restoreGroupHolder.hs.size != holderController.restoreGroupHolder.hb.size) return
+        val g = GroupWebViewHolder()
+        for (i in holderController.restoreGroupHolder.hs.indices) {
+            val hsi = holderController.restoreGroupHolder.hs[i]
+            val hbi = holderController.restoreGroupHolder.hb[i]
+            g.groupArr.add(WebViewHolder(hsi, startLoadingUri = hsi).apply {
+                dummy = true
+                savedState = hbi
+            })
+
+        }
+        g.curIdx = holderController.restoreGroupHolder.curIdx
+        holderController.restoreGroupHolder.hs.clear()
+        holderController.restoreGroupHolder.hb.clear()
+        holderController.restoreGroupHolder.curIdx = 0
+
+        g.changedListener = holderController
+
+        val toShowHolder = g.getCurrent()!!
+
+        val curH = holderController.currentGroup?.getCurrent() ?: throw KotlinNullPointerException()
+        holderController.add(g, 0)
+
+        supportFragmentManager.commit {
+            supportFragmentManager.findFragmentByTag(curH.uuidString)?.let {
+                hide(it)
+            }
+
+            add<WebviewFragment>(R.id.webview_box, toShowHolder.uuidString)
+
+        }
+        tabListModel.updateUI()
+    }
+
+
     override fun setFullScreenViewStatus(view: View?, hidden: Boolean) {
         if (hidden) {
             binding.fullscreenBox.removeAllViews()
@@ -968,3 +1008,88 @@ class UIModel(
     override fun isFullScreen() = _isFullScreen
 
 }
+
+
+fun initTabModel(
+    holderController: HolderController,
+    navigationChangedModel: NavigationChangedModel,
+    uiModel: UIModelListener,
+    binding: ActivityChromeBinding,
+) {
+    holderController.changedListener = object : ChangedListener {
+        override fun onTabRemoved() {
+            navigationChangedModel.clearNavigationChangedCallback()
+        }
+
+        override fun onTabAdded() {
+            navigationChangedModel.clearNavigationChangedCallback()
+        }
+
+        override fun onTabReplaced() {}
+
+        override fun onTabSelected(oldV: Int, newV: Int) {
+            navigationChangedModel.clearNavigationChangedCallback()
+            uiModel.updateUI()
+        }
+
+        override fun onTabDataChanged(
+            h: WebViewHolder, g: GroupWebViewHolder, changedType: Int
+        ) {
+
+            if (holderController.currentGroup?.getCurrent() == h && holderController.showLength == holderController.size) {
+                uiModel.updateUI(h, g, changedType)
+            }
+        }
+
+    }
+
+    holderController.groupHolderListener = object : GroupHolderListener {
+
+        override fun onTabGroupSelected(
+            oldG: Int, newG: Int
+        ) {
+            binding.tabList.setItemChecked(newG, true)
+
+            navigationChangedModel.clearNavigationChangedCallback()
+            uiModel.updateUI()
+        }
+
+        override fun onTabGroupRemoved(position: Int) {
+            navigationChangedModel.clearNavigationChangedCallback()
+        }
+
+        override fun onTabGroupAdded() {
+            if (holderController.size > 1) binding.tablistBtn.animate()
+                .translationY(-binding.tablistBtn.height * 0.2f)
+
+            navigationChangedModel.clearNavigationChangedCallback()
+        }
+
+        override fun onReloadTabInProxy() {
+
+            val curGroup = holderController.currentGroup
+
+            val webViewHolder = curGroup?.getCurrent() ?: throw KotlinNullPointerException()
+
+            if (webViewHolder.isLoading) {
+                webViewHolder.webView?.get()?.stopLoading()
+
+                webViewHolder.change {
+                    it.progress = 100
+                    it.isLoading = false
+                }
+            } else {
+                webViewHolder.webView?.get()?.reload()
+            }
+        }
+
+        override fun onLoadUrl(url: String) {
+            val curGroup = holderController.currentGroup
+
+            val webViewHolder = curGroup?.getCurrent() ?: throw KotlinNullPointerException()
+            webViewHolder.webView?.get()?.loadUrl(url)
+        }
+    }
+
+}
+

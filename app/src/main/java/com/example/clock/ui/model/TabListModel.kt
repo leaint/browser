@@ -2,6 +2,8 @@ package com.example.clock.ui.model
 
 import android.animation.Animator
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.database.DataSetObserver
 import android.util.Log
@@ -11,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.AdapterView
+import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
@@ -24,7 +27,6 @@ import com.example.clock.tab.manager.HolderController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.jvm.internal.Ref
 import kotlin.math.absoluteValue
 
 interface TabListEventListener {
@@ -70,10 +72,12 @@ class TabListModel {
 fun initTabListModel(
     context: Context,
     lifecycleOwner: LifecycleOwner,
-    binding: ActivityChromeBinding, tabListModel: TabListModel, uiModelListener: UIModelListener,
+    binding: ActivityChromeBinding,
+    tabListModel: TabListModel,
+    uiModelListener: UIModelListener,
     setting: GlobalWebViewSetting,
     holderController: HolderController,
-    exclusiveModelCallback: Ref.ObjectRef<Pair<Int, (() -> Unit)>?>
+    exclusiveModel: ExclusiveModel
 ) {
 
     binding.tablistBtn.apply {
@@ -345,6 +349,49 @@ fun initTabListModel(
                 }
             }
         }
+        setOnCreateContextMenuListener { menu, v, menuInfo ->
+            run {
+
+                val info = menuInfo as AdapterContextMenuInfo? ?: return@run
+
+                menu.add(R.string.copy_link).setOnMenuItemClickListener {
+                    val clipboard =
+                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val s = tabAdapter.getItem(info.position)?.getCurrent()?.startLoadingUri
+                        ?: return@setOnMenuItemClickListener true
+                    clipboard.setPrimaryClip(ClipData.newPlainText("WebView", s))
+                    true
+                }
+
+                menu.add("Close Other Tabs").apply {
+
+                    if (tabAdapter.count <= 1) {
+                        isEnabled = false
+                    }
+
+                    setOnMenuItemClickListener {
+
+                        val len = tabAdapter.count
+                        val cur = info.position
+                        for (i in 0..<cur) {
+                            uiModelListener.closeTab(0)
+                        }
+                        for (i in 1..<len - cur) {
+                            uiModelListener.closeTab(tabAdapter.count - 1)
+                        }
+                        true
+                    }
+                }
+
+                menu.add("Close All Tabs").setOnMenuItemClickListener {
+                    val len = tabAdapter.count
+                    for (i in 0..<len) {
+                        uiModelListener.closeTab(0)
+                    }
+                    true
+                }
+            }
+        }
     }
 
     binding.tabList.setItemChecked(0, true)
@@ -369,20 +416,15 @@ fun initTabListModel(
 
             }
 
-            exclusiveModelCallback.element?.let {
-                if (it.first == tabListModel.hashCode()) {
-                    exclusiveModelCallback.element = null
-                }
-            }
+            exclusiveModel.cancelCallback(tabListModel.hashCode())
         }
 
         override fun onShowTabList() {
 
-            exclusiveModelCallback.element?.let {
-                if (it.first != tabListModel.hashCode()) {
-                    it.second()
-                }
-            }
+            exclusiveModel.doAndAddCallback(
+                tabListModel.hashCode(),
+                tabListModel.hashCode() to tabListModel::closeTabList
+            )
 
             if (binding.tablistBox.visibility != View.VISIBLE) {
 
@@ -394,8 +436,6 @@ fun initTabListModel(
                 }
             }
 
-            exclusiveModelCallback.element =
-                tabListModel.hashCode() to tabListModel::closeTabList
         }
 
         override fun onUpdateUI() {/* no-op */

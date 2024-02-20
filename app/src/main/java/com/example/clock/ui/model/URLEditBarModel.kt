@@ -4,6 +4,10 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.text.InputType
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.util.TypedValue
 import android.view.ActionMode
 import android.view.Gravity
@@ -29,7 +33,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.jvm.internal.Ref
 
 interface URLEditEvent {
     fun onStartEdit()
@@ -94,7 +97,7 @@ fun initURLEditModel(
     lifecycleOwner: LifecycleOwner,
     binding: ActivityChromeBinding,
     urlEditModel: URLEditBarModel,
-    exclusiveModelCallback: Ref.ObjectRef<Pair<Int, (() -> Unit)>?>,
+    exclusiveModel: ExclusiveModel,
     uiModelListener: UIModelListener,
     toolBarModel: ToolBarModel,
     holderController: HolderController,
@@ -146,10 +149,47 @@ fun initURLEditModel(
         }
     }
 
-    binding.expandBtn.setOnClickListener {
-        urlEditModel.toggleExpand()
+//    binding.expandBtn.setOnClickListener {
+//        urlEditModel.toggleExpand()
+//    }
+
+    binding.expandBtn.movementMethod = LinkMovementMethod.getInstance()
+    val spannableString = SpannableStringBuilder("http:// https:// <-  ->  ⋀ ").apply {
+        setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                binding.urlEditText.editableText?.let {
+                    it.insert(0, "http://")
+                }
+            }
+
+        }, 0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                binding.urlEditText.editableText?.let {
+                    it.insert(0, "https://")
+
+                }
+            }
+        }, 8, 16, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                binding.urlEditText.setSelection(0)
+            }
+        }, 17, 20, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                binding.urlEditText.setSelection(binding.urlEditText.length() - 1)
+            }
+        }, 21, 23, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                urlEditModel.toggleExpand()
+            }
+        }, 24, 27, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
+    binding.expandBtn.setText(spannableString, TextView.BufferType.SPANNABLE)
     val canDoGestureFun = { !urlEditModel.isEditing }
 
     urlEditModel.urlEditEventListener = object : URLEditEvent {
@@ -159,9 +199,10 @@ fun initURLEditModel(
             binding.urlEditText.requestFocus()
             uiModelListener.showIME(binding.urlEditText)
 
-            exclusiveModelCallback.element?.let {
-                if (it.first != urlEditModel.hashCode()) it.second()
-            }
+            exclusiveModel.doAndAddCallback(
+                urlEditModel.hashCode(),
+                urlEditModel.hashCode() to urlEditModel::cancelEdit
+            )
 
             binding.urlEditToolbox.apply {
                 alpha = 0f
@@ -178,8 +219,7 @@ fun initURLEditModel(
 //                        binding.urlEdittext.inputType = binding.urlEdittext.inputType or InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 }
             }
-            exclusiveModelCallback.element =
-                urlEditModel.hashCode() to urlEditModel::cancelEdit
+
             toolBarModel.addCanDoGesture(canDoGestureFun)
         }
 
@@ -195,9 +235,7 @@ fun initURLEditModel(
                     visibility = View.GONE
                 }
             }
-            exclusiveModelCallback.element?.let {
-                if (it.first == urlEditModel.hashCode()) exclusiveModelCallback.element = null
-            }
+            exclusiveModel.cancelCallback(urlEditModel.hashCode())
 
             binding.urlEditToolbox.visibility = View.GONE
 
@@ -263,7 +301,7 @@ fun initURLEditModel(
                     TypedValue.COMPLEX_UNIT_SP, 200F, resources.displayMetrics
                 ).toInt()
             }
-            binding.expandBtn.text = "—"
+//            binding.expandBtn.text = "—"
             binding.suggestionList.visibility = View.GONE
         }
 
@@ -280,7 +318,7 @@ fun initURLEditModel(
                     TypedValue.COMPLEX_UNIT_DIP, 30F, resources.displayMetrics
                 ).toInt()
             }
-            binding.expandBtn.text = "⋀"
+//            binding.expandBtn.text = "⋀"
             binding.suggestionList.visibility = View.VISIBLE
         }
 
@@ -371,9 +409,8 @@ fun initURLEditModel(
                 } else {
                     "粘贴并搜索"
                 }
-                menu?.add(0, -8956894, Menu.FIRST, title)?.let {
-                    it.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-                }
+                menu?.add(0, -8956894, Menu.FIRST, title)
+                    ?.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
             }
 
             return true
