@@ -257,7 +257,7 @@ fun initTabListModel(
                     )
                 }
 
-                Log.d("TextView", "getView: $position ${view.hashCode()} ${convertView != null}")
+//                Log.d("TextView", "getView: $position ${view.hashCode()} ${convertView != null}")
                 return view
             }
         }.apply {

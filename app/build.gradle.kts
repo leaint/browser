@@ -12,7 +12,7 @@ android {
         minSdk = 31
         targetSdk = 34
         versionCode = 1
-        versionName = "1.1"
+        versionName = "1.2"
         manifestPlaceholders["build_type"] = ""
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -39,6 +39,11 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs = listOf(
+            "-Xno-call-assertions",
+            "-Xno-receiver-assertions",
+            "-Xno-param-assertions"
+        )
     }
     buildToolsVersion = "34.0.0"
     buildFeatures {

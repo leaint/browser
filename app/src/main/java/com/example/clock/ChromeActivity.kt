@@ -210,15 +210,17 @@ class ChromeActivity : FragmentActivity() {
             CookieHandler.setDefault(cookieManager)
         }
 
+        loadSettingJob = mainScope.launch(Dispatchers.IO) {
+            setting.loadSetting(this@ChromeActivity)
+
+            holderController.currentGroup?.getCurrent()?.loadingUrl = setting.INIT_URI
+
+            setting.reloadBookMark(this@ChromeActivity)
+        }
+
         mainScope.launch(Dispatchers.IO) {
 
-            loadSettingJob = mainScope.launch {
-                setting.loadSetting(this@ChromeActivity)
 
-                holderController.currentGroup?.getCurrent()?.loadingUrl = setting.INIT_URI
-
-                setting.reloadBookMark(this@ChromeActivity)
-            }
 
             try {
                 val httpCacheDir = File(

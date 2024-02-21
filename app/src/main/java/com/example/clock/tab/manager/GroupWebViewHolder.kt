@@ -52,25 +52,30 @@ class GroupWebViewHolder : TabDataChanged {
 
     var changedListener: ChangedListener? = null
 
-    fun removeElse(): Set<WebViewHolder> {
+    fun removeElse(): List<WebViewHolder> {
         changedListener?.onTabRemoved()
-        val ret = if (size > 0) {
-            groupArr.slice(curIdx + 1 until groupArr.size).toSet()
+
+        val a = curIdx + 1
+        val l = if (a >= 0 && a < groupArr.size) {
+            ArrayList(groupArr.subList(a, groupArr.size))
         } else {
-            emptySet()
+            emptyList()
         }
-        groupArr.removeAll(ret.toSet())
-        return ret
+        for (i in l.indices) {
+            groupArr.removeLast()
+        }
+
+        return l
     }
 
-    fun addTab(holder: WebViewHolder): Set<WebViewHolder> {
+    fun addTab(holder: WebViewHolder): List<WebViewHolder> {
         holder.tabDataChangedListener = this
         changedListener?.onTabAdded()
         // TODO: 必须 隐藏
         if (groupArr.size == 0 || curIdx == groupArr.size - 1) { //last
             groupArr.add(holder)
             curIdx = groupArr.size - 1
-            return emptySet()
+            return emptyList()
         } else {
             val ret = removeElse()
             groupArr.add(holder)
@@ -111,9 +116,9 @@ class GroupWebViewHolder : TabDataChanged {
     }
 
     // TODO: clear check
-    fun clear(): Set<WebViewHolder> {
+    fun clear(): List<WebViewHolder> {
         changedListener?.onTabRemoved()
-        return groupArr.toSet()
+        return groupArr
     }
 
     override fun onTabDataChanged(h: WebViewHolder, changedType: Int) {
@@ -314,10 +319,10 @@ class HolderController : Collection<GroupWebViewHolder>, ChangedListener {
                 if (j.uuid == tag) {
                     lastHolderInt2 = lastHolderInt
                     lastHolderInt = GroupAndHolder(i, j)
-                    Log.d(
-                        "HolderCache",
-                        "CACHE(INT): $tag -> ${lastHolderInt?.h?.uuidString}, ${lastHolderInt2?.h?.uuidString}, "
-                    )
+//                    Log.d(
+//                        "HolderCache",
+//                        "CACHE(INT): $tag -> ${lastHolderInt?.h?.uuidString}, ${lastHolderInt2?.h?.uuidString}, "
+//                    )
 
                     return lastHolderInt
                 }
@@ -332,14 +337,14 @@ class HolderController : Collection<GroupWebViewHolder>, ChangedListener {
         for (i in groupHolderArr) {
             for (j in i.groupArr) {
                 if (j.uuidString == tag) {
-                    Log.d("HolderCache", "FOUND: $tag")
+//                    Log.d("HolderCache", "FOUND: $tag")
                     return GroupAndHolder(i, j)
                 }
             }
         }
-        Log.d("HolderCache", "404: $tag")
-
-        Thread.dumpStack()
+//        Log.d("HolderCache", "404: $tag")
+//
+//        Thread.dumpStack()
 
         return null
     }

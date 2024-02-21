@@ -59,7 +59,7 @@ class HistoryFragment : Fragment() {
     private var db: SQLiteDatabase? = null
 
     private fun updateTime() {
-        pageViewModel?.history?.value?.get(binding.longList.firstVisiblePosition)
+        pageViewModel?.history?.value?.getOrNull(binding.longList.firstVisiblePosition)
             ?.let {
 
                 val offset = (System.currentTimeMillis() - it.time) / 1000
