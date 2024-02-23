@@ -58,14 +58,14 @@ class PowerEditText : EditText {
         val extendedPaddingTop = extendedPaddingTop
         val extendedPaddingBottom = extendedPaddingBottom
 
-        val vspace: Int = bottom - top - compoundPaddingBottom - compoundPaddingTop
+        val vspace: Int = bottom - top// - compoundPaddingBottom - compoundPaddingTop
         val maxScrollY: Int = layout.height - vspace
 
         var clipLeft = (compoundPaddingLeft + scrollX).toFloat()
-        var clipTop = (if (scrollY == 0) 0 else extendedPaddingTop + scrollY).toFloat()
+        var clipTop = (extendedPaddingTop + scrollY).toFloat()
         var clipRight = (right - left - compoundPaddingRight + scrollX).toFloat()
         var clipBottom = (bottom - top + scrollY
-                - if (scrollY == maxScrollY) 0 else extendedPaddingBottom).toFloat()
+                - if (scrollY == maxScrollY) -extendedPaddingBottom else extendedPaddingBottom).toFloat()
 
         if (shadowRadius != 0f) {
             clipLeft += Math.min(0f, shadowDx - shadowRadius)
@@ -74,35 +74,34 @@ class PowerEditText : EditText {
             clipBottom += Math.max(0f, shadowDy + shadowRadius)
         }
 
-
-        canvas.clipRect(0f, clipTop, clipRight, clipBottom + totalPaddingTop + 30f)
-//
-        canvas.translate(
-            0f,
-            extendedPaddingTop.toFloat() + 30f
-        )
+        canvas.clipRect(0f, clipTop, clipRight, clipBottom)
 
 
         paint.color = Color.GRAY
         paint.textAlign = Paint.Align.RIGHT
+
         val left = (paddingLeft.toFloat() - 15).coerceAtLeast(0f)
+
+        canvas.drawLine(
+            left,
+            clipTop,
+            left,
+            clipBottom,
+            paint
+        )
+
+        canvas.translate(0f, extendedPaddingTop.toFloat())
+
         if (lineMapToParagraph.size == layout.lineCount + 1) {
             for (i in firstLine..lastLine) {
 
-                val top = layout.getLineTop(i) + layout.getLineBottom(i) - layout.getLineBaseline(i)
+                val top = layout.getLineBaseline(i)
                 val lineNumber = lineMapToParagraph[i]
                 if (lineNumber > 0)
                     canvas.drawText("$lineNumber", left, top.toFloat(), paint)
             }
         }
 
-        canvas.drawLine(
-            (paddingLeft.toFloat() - 15).coerceAtLeast(0f),
-            clipTop,
-            paddingLeft.toFloat(),
-            clipBottom,
-            paint
-        )
         paint.color = backupColor
         paint.textAlign = textAlign
 

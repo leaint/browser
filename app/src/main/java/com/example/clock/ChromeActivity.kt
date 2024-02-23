@@ -31,6 +31,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.core.view.updateLayoutParams
@@ -47,7 +48,7 @@ import com.example.clock.tab.manager.WebViewHolder
 import com.example.clock.ui.main.LoadDataUrl
 import com.example.clock.ui.main.TAB_TITLES
 import com.example.clock.ui.main.WebViewTransport
-import com.example.clock.ui.model.ADPickModel
+import com.example.clock.ui.model.ADPickViewModel
 import com.example.clock.ui.model.BookMarkModel
 import com.example.clock.ui.model.ExclusiveModel
 import com.example.clock.ui.model.MainMenuEventListener
@@ -120,7 +121,7 @@ class ChromeActivity : FragmentActivity() {
 
     private val urlEditModel = URLEditBarModel()
 
-    private val adPickModel = ADPickModel()
+    private val adPickViewModel: ADPickViewModel by viewModels()
 
     private lateinit var toolBarModel: ToolBarModel
 
@@ -219,7 +220,6 @@ class ChromeActivity : FragmentActivity() {
         }
 
         mainScope.launch(Dispatchers.IO) {
-
 
 
             try {
@@ -375,9 +375,10 @@ class ChromeActivity : FragmentActivity() {
                     this,
                     setting,
                     AdPickBinding.bind(inflated),
-                    adPickModel,
+                    adPickViewModel,
                     holderController,
-                    uiModel
+                    uiModel,
+                    this,
                 )
             }
         }
@@ -769,7 +770,7 @@ class ChromeActivity : FragmentActivity() {
                     binding.adPickStub.inflate()
                     adPickInflated = true
                 }
-                adPickModel.toogleShow()
+                adPickViewModel.toggleShow()
             }
 
             MenuEnum.PC_MODE.ordinal -> {
