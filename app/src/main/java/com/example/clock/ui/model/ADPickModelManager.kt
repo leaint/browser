@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.viewModelScope
 import com.example.clock.databinding.AdPickBinding
 import com.example.clock.settings.GlobalWebViewSetting
 import com.example.clock.tab.manager.HolderController
@@ -36,33 +37,31 @@ class ADPickViewModel : ViewModel() {
 
     var recentResult = MutableStateFlow("")
 
+    fun clearRecentResult() {
+        recentResult.value = ""
+    }
+
     fun setIsTest(v: Boolean) {
         _isTest.value = v
     }
 
     fun toggleShow() {
-        when (uiState.value) {
-            ADPickUIState.CLOSED -> uiState.tryEmit(ADPickUIState.SHOWING)
-            else -> uiState.tryEmit(ADPickUIState.CLOSED)
+        val state = when (uiState.value) {
+            ADPickUIState.CLOSED -> ADPickUIState.SHOWING
+            else -> ADPickUIState.CLOSED
+        }
+        viewModelScope.launch {
+            uiState.emit(state)
         }
     }
 }
 
 interface ADPickEvent {
 
-    fun onShow()
-    fun onClose()
-
-    fun onShowPickTool()
-    fun onHidePickTool()
-
     fun getDownElem()
     fun getUpElem()
 
     fun getCur()
-
-    fun onShowPickMask()
-    fun onHidePickMask()
 
     fun doPick()
 
@@ -70,34 +69,128 @@ interface ADPickEvent {
     fun onTestReset(s: String)
 
     fun onAddRule(s: String)
+    fun onUpdatePickText(s: String)
+
+    fun onPickBtnClick()
+    fun onTestBtnClick(isChecked: Boolean)
+    fun onAddRuleClick()
+    fun onCloseBtnClick()
+    fun onPickModelClick()
 }
 
 @SuppressLint("ClickableViewAccessibility")
+class ADPick(
+    private val adPickBinding: AdPickBinding,
+    onInput: (s: String) -> Unit,
+    onPickBtnClick: () -> Unit,
+    onDownElemClick: () -> Unit,
+    onUpElemClick: () -> Unit,
+    onAddRuleClick: () -> Unit,
+    onCloseBtnClick: () -> Unit,
+    onTestBtnClick: (isChecked: Boolean) -> Unit,
+    onPickModelClick: () -> Unit,
+    onDispatchGenericMotionEvent: (event: MotionEvent) -> Unit
+) {
+    init {
+
+        adPickBinding.adPickTxt.addTextChangedListener {
+            it ?: return@addTextChangedListener
+            onInput(it.toString())
+        }
+
+        adPickBinding.adPickBtn.setOnClickListener {
+            onPickBtnClick()
+        }
+
+        adPickBinding.adPickDown.setOnClickListener {
+            onDownElemClick()
+        }
+
+        adPickBinding.adPickUp.setOnClickListener {
+            onUpElemClick()
+        }
+
+        adPickBinding.adPickTestBtn.setOnCheckedChangeListener { _, isChecked ->
+            onTestBtnClick(isChecked)
+        }
+
+        adPickBinding.adPickAdd.setOnClickListener {
+            onAddRuleClick()
+
+        }
+
+        adPickBinding.adPickClose.setOnClickListener {
+            onCloseBtnClick()
+        }
+
+        adPickBinding.adPickView.setOnTouchListener { _, event ->
+            run {
+
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        event.action =
+                            (event.action and MotionEvent.ACTION_MASK.inv()) or MotionEvent.ACTION_HOVER_EXIT
+                        onPickModelClick()
+                    }
+
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_SCROLL -> {
+                        event.action =
+                            (event.action and MotionEvent.ACTION_MASK.inv()) or MotionEvent.ACTION_HOVER_MOVE
+                    }
+                }
+
+                onDispatchGenericMotionEvent(event)
+                false
+            }
+        }
+    }
+
+    fun onShow() {
+        adPickBinding.adPickBox.visibility = View.VISIBLE
+    }
+
+    fun onClose() {
+        adPickBinding.adPickBox.visibility = View.GONE
+    }
+
+    fun onShowPickTool() {
+        adPickBinding.adPickToolBox.visibility = View.VISIBLE
+    }
+
+    fun onHidePickTool() {
+        adPickBinding.adPickToolBox.visibility = View.GONE
+    }
+
+    fun onShowPickMask() {
+        adPickBinding.adPickView.visibility = View.VISIBLE
+    }
+
+    fun onHidePickMask() {
+        adPickBinding.adPickView.visibility = View.GONE
+    }
+
+    fun getTestChecked() = adPickBinding.adPickTestBtn.isChecked
+    fun setTestChecked(isChecked: Boolean) {
+        adPickBinding.adPickTestBtn.isChecked = isChecked
+    }
+
+    fun getPickText() = adPickBinding.adPickTxt.text.toString()
+    fun setPickText(s: String) {
+        adPickBinding.adPickTxt.setText(s)
+    }
+}
+
 fun initAdPickModel(
     context: Context,
     setting: GlobalWebViewSetting,
-    binding: AdPickBinding,
+    adPickBinding: AdPickBinding,
     adPickModel: ADPickViewModel,
     holderController: HolderController,
     uiModelListener: UIModelListener,
     owner: LifecycleOwner,
 ) {
+
     val pickEventListener = object : ADPickEvent {
-        override fun onShow() {
-            binding.adPickBox.visibility = View.VISIBLE
-        }
-
-        override fun onClose() {
-            binding.adPickBox.visibility = View.GONE
-        }
-
-        override fun onShowPickTool() {
-            binding.adPickToolBox.visibility = View.VISIBLE
-        }
-
-        override fun onHidePickTool() {
-            binding.adPickToolBox.visibility = View.GONE
-        }
 
         override fun getDownElem() {
             holderController.currentGroup?.getCurrent()?.webView?.get()
@@ -112,15 +205,6 @@ fun initAdPickModel(
                 ?.evaluateJavascript("goUp()") {
                     adPickModel.recentResult.tryEmit(it)
                 }
-        }
-
-        override fun onShowPickMask() {
-            binding.adPickView.visibility = View.VISIBLE
-        }
-
-        override fun onHidePickMask() {
-            binding.adPickView.visibility = View.GONE
-
         }
 
         override fun getCur() {
@@ -146,8 +230,7 @@ fun initAdPickModel(
 
         override fun onAddRule(s: String) {
             holderController.currentGroup?.getCurrent()?.webView?.get()?.let {
-                val u = it.url ?: return@let
-                val h = hostMatch(u) ?: return@let
+                val h = hostMatch(it.url ?: return@let) ?: return@let
                 uiModelListener.makeToast("Add Rule?\n$h##$s", MyToast.LENGTH_LONG)
                     .setAction("YES") {
                         val cur = setting.ad_rule[h]
@@ -168,32 +251,74 @@ fun initAdPickModel(
             holderController.currentGroup?.getCurrent()?.webView?.get()
                 ?.evaluateJavascript(setting.do_pick_js, null)
         }
+
+        override fun onUpdatePickText(s: String) {
+            adPickModel.recentResult.tryEmit(s)
+        }
+
+        override fun onPickBtnClick() {
+            adPickModel.uiState.tryEmit(ADPickUIState.PICKING)
+        }
+
+        override fun onTestBtnClick(isChecked: Boolean) {
+            adPickModel.setIsTest(isChecked)
+        }
+
+        override fun onAddRuleClick() {
+            onAddRule(adPickModel.recentResult.value.trim())
+        }
+
+        override fun onCloseBtnClick() {
+            adPickModel.uiState.tryEmit(ADPickUIState.CLOSED)
+        }
+
+        override fun onPickModelClick() {
+            if (adPickModel.uiState.value == ADPickUIState.PICKING) {
+                getCur()
+                adPickModel.uiState.tryEmit(ADPickUIState.SHOWING)
+            }
+        }
     }
+
+    val adPick = ADPick(
+        adPickBinding,
+        pickEventListener::onUpdatePickText,
+        pickEventListener::onPickBtnClick,
+        pickEventListener::getDownElem,
+        pickEventListener::getUpElem,
+        pickEventListener::onAddRuleClick,
+        pickEventListener::onCloseBtnClick,
+        pickEventListener::onTestBtnClick,
+        pickEventListener::onPickModelClick
+
+    ) { event ->
+        holderController.currentGroup?.getCurrent()?.webView?.get()
+            ?.dispatchGenericMotionEvent(event)
+    }
+
     owner.lifecycle.coroutineScope.launch {
 
         adPickModel.uiState.collect {
 
             when (it) {
                 ADPickUIState.CLOSED -> {
-                    pickEventListener.onClose()
-                    adPickModel.recentResult.value = ""
+                    adPick.onClose()
+                    adPickModel.clearRecentResult()
                 }
 
                 ADPickUIState.PICKING -> {
-                    adPickModel.recentResult.value = ""
-                    pickEventListener.onHidePickTool()
-                    pickEventListener.onShowPickMask()
+                    adPickModel.clearRecentResult()
+                    adPick.onHidePickTool()
+                    adPick.onShowPickMask()
                     pickEventListener.doPick()
-
                 }
 
                 ADPickUIState.SHOWING -> {
-                    pickEventListener.onShow()
-                    pickEventListener.onShowPickTool()
-                    pickEventListener.onHidePickMask()
+                    adPick.onShow()
+                    adPick.onShowPickTool()
+                    adPick.onHidePickMask()
                     adPickModel.setIsTest(false)
                 }
-
             }
         }
 
@@ -203,11 +328,11 @@ fun initAdPickModel(
 
         adPickModel.recentResult.transform {
             val s = it.trim('"')
-            if (!s.contentEquals(binding.adPickTxt.text.toString())) {
+            if (!s.contentEquals(adPick.getPickText())) {
                 emit(s)
             }
         }.collect {
-            binding.adPickTxt.setText(it)
+            adPick.setPickText(it)
         }
     }
 
@@ -221,63 +346,8 @@ fun initAdPickModel(
             pickEventListener.onTestReset(s)
         }
 
-        if (it != binding.adPickTestBtn.isChecked) {
-            binding.adPickTestBtn.isChecked = it
+        if (it != adPick.getTestChecked()) {
+            adPick.setTestChecked(it)
         }
     }
-
-    binding.adPickView.setOnTouchListener { _, event ->
-        run {
-
-            if (adPickModel.uiState.value == ADPickUIState.PICKING) {
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        event.action =
-                            (event.action and MotionEvent.ACTION_MASK.inv()) or MotionEvent.ACTION_HOVER_EXIT
-                        pickEventListener.getCur()
-                        adPickModel.uiState.tryEmit(ADPickUIState.SHOWING)
-                    }
-
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_SCROLL -> {
-                        event.action =
-                            (event.action and MotionEvent.ACTION_MASK.inv()) or MotionEvent.ACTION_HOVER_MOVE
-                    }
-
-                }
-                holderController.currentGroup?.getCurrent()?.webView?.get()
-                    ?.dispatchGenericMotionEvent(event)
-            }
-            false
-        }
-    }
-
-    binding.adPickTxt.addTextChangedListener {
-        it ?: return@addTextChangedListener
-        adPickModel.recentResult.tryEmit(it.toString())
-    }
-
-    binding.adPickBtn.setOnClickListener {
-        adPickModel.uiState.tryEmit(ADPickUIState.PICKING)
-    }
-
-    binding.adPickDown.setOnClickListener {
-        pickEventListener.getDownElem()
-    }
-
-    binding.adPickUp.setOnClickListener {
-        pickEventListener.getUpElem()
-    }
-
-    binding.adPickTestBtn.setOnCheckedChangeListener { _, isChecked ->
-        adPickModel.setIsTest(isChecked)
-    }
-
-    binding.adPickAdd.setOnClickListener {
-        pickEventListener.onAddRule(adPickModel.recentResult.value.trim())
-    }
-
-    binding.adPickClose.setOnClickListener {
-        adPickModel.uiState.tryEmit(ADPickUIState.CLOSED)
-    }
-
 }

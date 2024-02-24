@@ -5,9 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -252,6 +249,7 @@ class HistoryFragment : Fragment() {
                 }
 
                 menu.add(0, 0, 0, R.string.copy_link)
+                menu.add(0, 1, 0, R.string.open_in_new_tab)
             }
         }
 
@@ -278,6 +276,18 @@ class HistoryFragment : Fragment() {
                         Toast.makeText(requireContext(), "Copied", Toast.LENGTH_SHORT).show()
                     }
 
+                    1 -> {
+
+                        setFragmentResult(
+                            "history",
+                            Bundle().apply {
+                                putString("url", v[info.position].url)
+                                putBoolean("multi", true)
+                            }
+
+                        )
+
+                    }
                 }
             }
         }

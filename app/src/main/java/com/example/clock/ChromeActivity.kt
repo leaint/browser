@@ -31,11 +31,11 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.core.view.get
 import androidx.core.view.size
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.clock.databinding.ActivityChromeBinding
 import com.example.clock.databinding.AdPickBinding
 import com.example.clock.databinding.SearchBoxBinding
@@ -121,7 +121,7 @@ class ChromeActivity : FragmentActivity() {
 
     private val urlEditModel = URLEditBarModel()
 
-    private val adPickViewModel: ADPickViewModel by viewModels()
+    private lateinit var adPickViewModel: ADPickViewModel
 
     private lateinit var toolBarModel: ToolBarModel
 
@@ -156,9 +156,13 @@ class ChromeActivity : FragmentActivity() {
     private val startHistory =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             it.data?.extras?.let {
-                it.getString("url")?.let {
+//                it.getString("url")?.let {
+//                    uiModel.newGroupTab(it)
+//                }
+                it.getStringArrayList("url_list")?.forEach {
                     uiModel.newGroupTab(it)
                 }
+
                 if (it.getBoolean("changed")) {
                     mainScope.launch {
                         setting.reloadBookMark(this@ChromeActivity)
@@ -371,6 +375,7 @@ class ChromeActivity : FragmentActivity() {
             run {
                 stub.setOnInflateListener(null)
 
+                adPickViewModel = ViewModelProvider(this)[ADPickViewModel::class.java]
                 initAdPickModel(
                     this,
                     setting,

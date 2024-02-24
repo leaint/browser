@@ -28,10 +28,15 @@ class HistoryActivity : FragmentActivity() {
             setResult(RESULT_OK, resIntent.apply {
                 result.getString("url")?.let {
                     putExtra("url", it)
+                    val url = it
+                    val list = resIntent.getStringArrayListExtra("url_list") ?: ArrayList<String>()
+                    list.add(url)
+                    resIntent.putStringArrayListExtra("url_list", list)
                 }
             })
-            finish()
-
+            if (!result.getBoolean("multi")) {
+                finish()
+            }
         }
         supportFragmentManager.setFragmentResultListener(
             "changed",
@@ -94,8 +99,8 @@ class HistoryActivity : FragmentActivity() {
 
         })
 
-        TAB_TITLES.indexOf(intent.extras?.getInt("page")).let{
-            if(it != -1 && it != viewPager.currentItem) {
+        TAB_TITLES.indexOf(intent.extras?.getInt("page")).let {
+            if (it != -1 && it != viewPager.currentItem) {
                 viewPager.currentItem = it
             }
         }

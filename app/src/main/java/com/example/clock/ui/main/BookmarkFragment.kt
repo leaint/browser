@@ -163,9 +163,9 @@ class BookmarkFragment : Fragment() {
 
         binding.longList.setOnCreateContextMenuListener { menu, v, menuInfo ->
             run {
-                menu.add(0, 0, 0, "Edit")
-                menu.add(0, 1, 0, "Delete")
-                menu.add(0, 2, 0, "Add to HomePage")
+                menu.add(1, 0, 0, "Edit")
+                menu.add(1, 1, 0, "Delete")
+                menu.add(1, 2, 0, "Add to HomePage")
             }
         }
 //
@@ -211,7 +211,7 @@ class BookmarkFragment : Fragment() {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        if (item.groupId == 0) {
+        if (item.groupId == 1) {
             val info = item.menuInfo as AdapterContextMenuInfo
             val v = pageViewModel.data.value
             if (v != null) {
