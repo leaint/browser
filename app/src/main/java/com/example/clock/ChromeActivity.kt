@@ -749,7 +749,7 @@ class ChromeActivity : FragmentActivity() {
                                             null,
                                             "<html><head><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css\">\n" +
                                                     "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js\"></script>\n" +
-                                                    "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js\"></script>\n</head><body><pre><code class=\"language-html\"></code></pre><xmp id=\"temp\" type=\"text/html\">" + s + "</xmp><script>let a = document.querySelector('code');let b = document.querySelector('#temp'); a.textContent = b.innerHTML;b.remove(); hljs.highlightAll();</script></body></html>",
+                                                    "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js\"></script>\n</head><body><div><label >Line wrap<input id=\"line-wrap-control\" onchange=\"onWrap(this)\" type=\"checkbox\" aria-label=\"Line wrap\"></label></div><pre><code class=\"language-html\"></code></pre><xmp id=\"temp\" type=\"text/html\">" + s + "</xmp><script>let pre=document.querySelector('pre');function onWrap(e){if(e.checked){pre.style.whiteSpace = 'pre-wrap';pre.style.overflowWrap='anywhere';}else{pre.style.whiteSpace = 'pre';pre.style.overflowWrap='';}};let a = document.querySelector('code');let b = document.querySelector('#temp'); a.textContent = b.innerHTML;b.remove(); hljs.highlightAll();</script></body></html>",
                                             "text/html",
                                             null,
                                             null
@@ -799,13 +799,13 @@ class ChromeActivity : FragmentActivity() {
                         val buf = StringBuilder(loadedResources.size * 100 + 500)
 
                         buf.append(
-                            "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\" />" + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />" + "<title></title></head><body><div id=\"app\"><pre style=\"line-height:150%;white-space:pre-wrap;overflow-wrap: anywhere;\">"
+                            "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\" />" + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />" + "<title></title></head><body><div id=\"app\"><style>p{line-height:150%;white-space:pre-wrap;overflow-wrap: anywhere;user-select:all;}</style>"
                         )
                         it.loadedResources.forEach {
-                            buf.append(it).append('\n')
+                            buf.append("<p>").append(it).append("</p>")
                         }
 
-                        buf.append("</p></div></body></html>")
+                        buf.append("</div></body></html>")
                         val msg = delayLoadingHandler.obtainMessage(
                             1, WebViewTransport(
                                 LoadDataUrl(

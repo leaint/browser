@@ -179,7 +179,7 @@ fun initURLEditModel(
         }, 17, 20, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         setSpan(object : ClickableSpan() {
             override fun onClick(widget: View) {
-                binding.urlEditText.setSelection(binding.urlEditText.length() - 1)
+                binding.urlEditText.setSelection(binding.urlEditText.length())
             }
         }, 21, 23, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         setSpan(object : ClickableSpan() {

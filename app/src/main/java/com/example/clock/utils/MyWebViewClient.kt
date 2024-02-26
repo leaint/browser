@@ -1,6 +1,10 @@
 package com.example.clock.utils
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.graphics.Bitmap
+import android.net.http.SslError
+import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -30,6 +34,31 @@ class MyWebViewClient(
     ) {
         super.onReceivedError(view, request, error)
 
+    }
+
+    @SuppressLint("WebViewClientOnReceivedSslError")
+    override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+
+        AlertDialog.Builder(view!!.context).apply {
+            setTitle("证书错误：" + error!!.getPrimaryErrorString())
+            setMessage("URL:\n" + error.url + "\nCertificate:\n" + error.certificate)
+
+            setPositiveButton("停止访问") { _, _ ->
+                run {
+                    handler?.cancel()
+                }
+            }
+            setNegativeButton("忽略") { _, _ ->
+                run {
+                    handler?.proceed()
+                }
+            }
+
+            setOnDismissListener {
+                handler?.cancel()
+            }
+            create()
+        }.show()
     }
 
     override fun doUpdateVisitedHistory(
