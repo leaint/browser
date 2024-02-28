@@ -28,6 +28,7 @@ import com.example.clock.databinding.ActivityChromeBinding
 import com.example.clock.settings.GlobalWebViewSetting
 import com.example.clock.tab.manager.HolderController
 import com.example.clock.utils.MyToast
+import com.example.clock.utils.getClipText
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -133,6 +134,22 @@ fun initURLEditModel(
         setOnItemClickListener { parent, view, position, id ->
             run {
                 suggestAdapter.getItem(position)?.url?.let { urlEditModel.doAction(it) }
+            }
+        }
+
+        setOnItemLongClickListener { parent, view, position, id ->
+            run {
+                binding.urlEditText.editableText?.let {
+                    suggestAdapter.getItem(position)?.url?.let { title ->
+                        it.replace(
+                            0,
+                            it.length,
+                            title
+                        )
+                    }
+
+                }
+                true
             }
         }
     }
@@ -361,6 +378,37 @@ fun initURLEditModel(
             if (sugg.isNotEmpty()) {
                 suggestAdapter.addAll(sugg)
 //                        binding.suggestionList.scrollListBy(1) //.smoothScrollToPosition(sugg.size-1)
+            }
+            if (it1.isBlank()) {
+                val lastClipText = getClipText(context)
+                if (urlSuggestionModel.lastSearchKeyword.isNotBlank() && urlSuggestionModel.lastSearchKeyword != lastClipText) {
+                    suggestAdapter.add(
+                        SuggestItem(
+                            SuggestItem.LAST_SEARCH_SUGGEST,
+                            setting.search_url + urlSuggestionModel.lastSearchKeyword,
+                            urlSuggestionModel.lastSearchKeyword
+                        )
+                    )
+                }
+                if (lastClipText != null) {
+                    if (lastClipText.startsWith("http://") || lastClipText.startsWith("https://")) {
+                        suggestAdapter.add(
+                            SuggestItem(
+                                SuggestItem.CLIP_TEXT_SUGGEST,
+                                lastClipText,
+                                lastClipText
+                            )
+                        )
+                    } else {
+                        suggestAdapter.add(
+                            SuggestItem(
+                                SuggestItem.CLIP_TEXT_SUGGEST,
+                                setting.search_url + lastClipText,
+                                lastClipText
+                            )
+                        )
+                    }
+                }
             }
 
             delay(500)

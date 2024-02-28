@@ -1,6 +1,6 @@
 package com.example.clock.ui.model
 
-import androidx.lifecycle.LifecycleOwner
+import androidx.annotation.IntDef
 import com.example.clock.internal.J
 import com.example.clock.settings.ChangedType
 import com.example.clock.settings.GlobalWebViewSetting
@@ -13,10 +13,29 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.regex.Pattern
 
-class SuggestItem(val c: Int, val url: String, val title: String)
+@Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@IntDef(
+    SuggestItem.LAST_SEARCH_SUGGEST,
+    SuggestItem.CLIP_TEXT_SUGGEST,
+    SuggestItem.SEARCH_RESULT_SUGGEST,
+    SuggestItem.SEARCH_SUGGEST,
+    SuggestItem.HISTORY_SUGGEST
+)
+@Retention(AnnotationRetention.SOURCE)
+annotation class SuggestItemType
+
+class SuggestItem(@SuggestItemType val c: Int, val url: String, val title: String) {
+
+    companion object {
+        const val LAST_SEARCH_SUGGEST = -5
+        const val CLIP_TEXT_SUGGEST = -4
+        const val SEARCH_RESULT_SUGGEST = -3
+        const val SEARCH_SUGGEST = -1
+        const val HISTORY_SUGGEST = 1
+    }
+}
 
 class URLSuggestionModel(
-    lifecycleOwner: LifecycleOwner,
     private val historyManager: HistoryManager,
     private val setting: GlobalWebViewSetting
 ) {
@@ -35,6 +54,8 @@ class URLSuggestionModel(
             }
         }
     }
+
+    var lastSearchKeyword = ""
 
     suspend fun getSuggest(s: String): ArrayList<SuggestItem> {
         var arr = ArrayList<SuggestItem>()
@@ -70,7 +91,10 @@ class URLSuggestionModel(
                                 val s = matcher.group(1)
                                 val ss = s.split("</title><link>")
                                 if (ss.size >= 2) {
-                                    sugs.add(0, SuggestItem(-3, ss[1], ss[0]))
+                                    sugs.add(
+                                        0,
+                                        SuggestItem(SuggestItem.SEARCH_RESULT_SUGGEST, ss[1], ss[0])
+                                    )
                                 }
                             }
                         }
@@ -146,19 +170,25 @@ class URLSuggestionModel(
             }
 
             arr = historyManager.getTopSite(s)
-            for (item in  bookMarks) {
+            for (item in bookMarks) {
                 val url = item.url
                 val title = item.title
                 if (url.indexOf(s) != -1 || title.indexOf(s) != -1) {
                     arr.add(
                         SuggestItem(
-                            1, url, title
+                            SuggestItem.HISTORY_SUGGEST, url, title
                         )
                     )
                 }
             }
             searchSuggestionJob.await().forEach {
-                arr.add(SuggestItem(-1, J.concat(setting.search_url, it), it))
+                arr.add(
+                    SuggestItem(
+                        SuggestItem.SEARCH_SUGGEST,
+                        J.concat(setting.search_url, it),
+                        it
+                    )
+                )
             }
             arr.addAll(searchResultJob.await())
         }

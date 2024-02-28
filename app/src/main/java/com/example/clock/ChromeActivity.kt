@@ -210,7 +210,7 @@ class ChromeActivity : FragmentActivity() {
 
         historyManager = HistoryManager(this@ChromeActivity, this@ChromeActivity)
 
-        urlSuggestionModel = URLSuggestionModel(this, historyManager, setting)
+        urlSuggestionModel = URLSuggestionModel(historyManager, setting)
         ignore {
             CookieHandler.setDefault(cookieManager)
         }
@@ -872,6 +872,7 @@ class ChromeActivity : FragmentActivity() {
 
         if (intent.action == Intent.ACTION_WEB_SEARCH) {
             intent.getStringExtra(SearchManager.QUERY)?.let {
+                urlSuggestionModel.lastSearchKeyword = it
                 uiModel.newGroupTab(J.concat(setting.search_url, it))
             }
         } else {
