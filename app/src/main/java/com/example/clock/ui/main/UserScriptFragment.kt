@@ -379,6 +379,20 @@ class EditUserScriptFragment : Fragment() {
 
             """.trimIndent(),
 
+            "Script" to """
+                let script = document.createElement('script');
+                script.src='';
+                script.text = `
+                
+                `;
+                document.body.appendChild(script);
+            """.trimIndent(),
+
+            "Html" to """
+                /* beforebegin afterbegin beforeend afterend */
+                document.body.insertAdjacentHTML('beforeend', `<div></div>`);
+            """.trimIndent(),
+
             "setInterval" to """"
                 var maxCount = 10;
                 var _id = setInterval(()=>{

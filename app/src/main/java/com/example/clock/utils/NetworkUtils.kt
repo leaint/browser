@@ -335,7 +335,11 @@ class ConnHelper {
 
             try {
                 ignore {
-                    urlConn.inputStream.close()
+                    if (urlConn.responseCode < 400) {
+                        urlConn.inputStream.close()
+                    } else {
+                        urlConn.errorStream.close()
+                    }
                 }
 
                 val sbuf = StringBuilder(1024)

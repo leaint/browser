@@ -21,10 +21,10 @@ class RequestFilter(
 )
 
 object WebRequestFilter {
-
-    val EmptyInputStream = object : InputStream() {
-        override fun read(): Int = -1
-    }
+//
+//    val EmptyInputStream = object : InputStream() {
+//        override fun read(): Int = -1
+//    }
 
     fun replaceRuleFilter(
         request: WebResourceRequest,
@@ -153,16 +153,15 @@ object WebRequestFilter {
         request: WebResourceRequest,
         globalWebViewSetting: GlobalWebViewSetting
     ): WebResourceResponse? {
-        val host = hostMatch(request.url.toString()) ?: return null
-        val frag = host.split('.')
-        if (frag.size == 3) {
-            val url = request.url
-            var path = ""
-            if (url.path != null) path += url.encodedPath
-            if (url.query != null) path += "?" + url.encodedQuery
-            if (url.fragment != null) path += "#" + url.encodedFragment
+        val host = request.url.host ?: return null
+        val idx = J.indexOf(host, '.')
 
-            val sinaimg = URL("http", "${frag[0]}.sinaimg.cn", 80, path)
+        if (idx >= 0) {
+            val frag = host.substring(0, idx)
+
+            val url = request.url.toString()
+            val sinaimg =
+                URL("http://$frag.sinaimg.cn/${url.substring(host.length + 9)}")
 
             ignore {
 
@@ -170,9 +169,9 @@ object WebRequestFilter {
                 urlConn.apply {
                     setRequestProperty("user-agent", globalWebViewSetting.user_agent)
                     setRequestProperty("referer", "https://weibo.com/")
-//                                        urlConn.setRequestProperty("X-Android-Transports", "h2,http/1.1")
+                    // 使用80端口，http2无效
+//                    setRequestProperty("X-Android-Transports", "h2,http/1.1")
                     requestMethod = request.method
-                    readTimeout = 30000
                 }
 
                 var mime = "image/jpeg"
@@ -184,8 +183,6 @@ object WebRequestFilter {
                         mime = arr[0]
                     }
                 }
-
-//                                    val bufStream = BufferedInputStream(urlConn.inputStream)
 
                 return WebResourceResponse(mime, "utf-8", urlConn.inputStream)
             }
@@ -232,8 +229,7 @@ object WebRequestFilter {
                     )
                 }
 
-                urlConn.hostnameVerifier =
-                    HostnameVerifier { hostname, session -> true }
+                urlConn.hostnameVerifier = HostnameVerifier { _, _ -> true }
 
                 val responseHeaders = ArrayMap<String, String>()
 
@@ -269,7 +265,7 @@ object WebRequestFilter {
                     } else {
                         val bufStream =
                             ConnHelper.wrongResponse(urlConn)
-                                .getOrDefault(EmptyInputStream)
+                                .getOrDefault(null)
                         return WebResourceResponse(
                             "text/html",
                             "utf-8",
@@ -284,7 +280,7 @@ object WebRequestFilter {
                         ConnHelper.autoRedirect2(urlConn)
                             .getOrDefault(
                                 ConnHelper.wrongResponse(urlConn)
-                                    .getOrDefault(EmptyInputStream)
+                                    .getOrDefault(null)
                             )
                     return WebResourceResponse(
                         "text/html",
@@ -325,6 +321,7 @@ object WebRequestFilter {
 //
 
 
+                // 所有的 [400, 499] 都会转成 404 错误
                 val responseCode = urlConn.responseCode
                 if (responseCode !in 300..399 || !request.isForMainFrame) {
                     if (responseCode in 300..399) {
@@ -336,7 +333,17 @@ object WebRequestFilter {
 //                    ) {
 //                        GZIPInputStream(urlConn.inputStream)
 //                    } else {
-                    val bufStream = urlConn.inputStream
+
+                    // okhttp/internal/huc/HttpURLConnectionImpl.java
+                    // 调用getInputStream()，response code >= 400 时，
+                    // 会抛出FileNotFoundException(url.toString());
+                    // 此时 response 流可用 getErrorStream() 获取
+                    val bufStream = if (responseCode >= 400) {
+                        urlConn.errorStream
+                    } else {
+                        urlConn.inputStream
+                    }
+
                     var mime = "text/html"
                     val mimetype = urlConn.headerFields["content-type"]
                     if (mimetype != null) {
@@ -367,7 +374,7 @@ object WebRequestFilter {
                 } else {
                     val bufStream =
                         ConnHelper.autoRedirect2(urlConn)
-                            .getOrDefault(EmptyInputStream)
+                            .getOrDefault(null)
                     return WebResourceResponse(
                         "text/html",
                         "utf-8",

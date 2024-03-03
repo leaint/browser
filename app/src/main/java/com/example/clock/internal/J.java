@@ -12,6 +12,10 @@ public class J {
         return s.repeat(n);
     }
 
+    public static int indexOf(@NonNull String s, char c) {
+        return s.indexOf(c, 0);
+    }
+
     @NonNull
     public static String concat(@NonNull String a, @NonNull String b) {
         return a.concat(b);
