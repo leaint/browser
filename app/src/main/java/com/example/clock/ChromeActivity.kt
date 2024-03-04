@@ -15,6 +15,7 @@ import android.os.StrictMode.VmPolicy
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.ActionMode
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.RoundedCorner
 import android.view.View
@@ -190,7 +191,9 @@ class ChromeActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableStrictMode()
+        if (!packageName.endsWith(".release")) {
+            enableStrictMode()
+        }
         binding = ActivityChromeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -918,6 +921,14 @@ class ChromeActivity : FragmentActivity() {
         }
 
         super.onActionModeStarted(mode)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            toolBarModel.show()
+            mainMenuModel.showMenu()
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onDestroy() {

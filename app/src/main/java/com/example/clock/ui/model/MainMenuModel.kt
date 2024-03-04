@@ -27,12 +27,14 @@ class MainMenuModel {
     }
 
     fun showMenu() {
+        if (isShow) return
         isShow = true
         mainMenuEventListener?.onMenuUpdate()
         mainMenuEventListener?.onMenuShow()
     }
 
     fun hideMenu() {
+        if (!isShow) return
         isShow = false
         mainMenuEventListener?.onMenuHide()
     }
