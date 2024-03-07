@@ -30,7 +30,7 @@
     <string name="default_useragent_str">默认用户代理字符串</string>
     <string name="cached_tab_count">可复用的标签页数量</string>
     <string name="user_script">用户脚本</string>
-    <string name="can_copy_str">在网站在启用复制操作</string>
+    <string name="can_copy_str">在网站中启用复制操作</string>
     <string name="site_settings">网站设置</string>
     <string name="cache_navigation">缓存导航</string>
     <string name="cache_navigation_global">缓存导航全局默认值</string>

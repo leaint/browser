@@ -171,13 +171,6 @@ class ConnHelper {
             if (ips.isEmpty()) return Result.failure(Exception("empty dns ${url.host}"))
 
             val ip = ips.last()
-            var urlPath = ""
-            if (url.path != null)
-                urlPath += url.encodedPath
-            if (url.query != null)
-                urlPath += "?" + url.encodedQuery
-            if (url.fragment != null)
-                urlPath += "#" + url.encodedFragment
 
             var domain = ip
             var port = 80
@@ -187,7 +180,7 @@ class ConnHelper {
             if (ip.contains(':'))
                 domain = "[$ip]"
 
-            val reddit = URL(url.scheme, domain, port, urlPath)
+            val reddit = URL(url.toString().replace(host, domain))
             val urlConn = reddit.openConnection() as HttpURLConnection
             with(urlConn) {
                 instanceFollowRedirects = false
@@ -200,7 +193,6 @@ class ConnHelper {
                     "Accept-Language",
                     "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"
                 )
-                readTimeout = 10_000
                 connectTimeout = 20_000
             }
 
