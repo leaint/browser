@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.net.http.SslError
+import android.util.ArrayMap
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -12,10 +13,20 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.example.clock.internal.J
 import com.example.clock.settings.GlobalWebViewSetting
+import com.example.clock.settings.ignore
 import com.example.clock.tab.manager.WebViewHolder
+import com.example.clock.ui.main.UserScriptFragment
 import com.example.clock.ui.main.WebViewTag
 import com.example.clock.ui.model.UIModelListener
+import com.example.clock.ui.model.UserScript
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
 import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.file.Files
 
 
 class MyWebViewClient(
@@ -23,6 +34,7 @@ class MyWebViewClient(
 //    val tag: String?,
     val uiModelListener: UIModelListener,
     val globalWebViewSetting: GlobalWebViewSetting,
+    val scope: CoroutineScope,
 //    val cacheHistoryItem: CacheHistoryItem
 ) : WebViewClient() {
 
@@ -159,8 +171,12 @@ class MyWebViewClient(
             }
 
             for (it in globalWebViewSetting.userscriptMap) {
-                if (J.startsWith(url, it.key) || J.endsWith(host, it.key)) {
-                    view?.evaluateJavascript(it.value.content, null)
+                if (J.startsWith(url, it.key) || J.endsWith(
+                        host,
+                        it.key
+                    ) || it.key == GlobalWebViewSetting.ALL_URLS
+                ) {
+                    view?.evaluateJavascript(globalWebViewSetting.gm_js + it.value.content, null)
                 }
             }
 //            globalWebViewSetting.userscriptMap.asSequence()
@@ -175,7 +191,82 @@ class MyWebViewClient(
             val tag = (view?.tag as? WebViewTag)?.tag ?: return
 
             uiModelListener.onPageFinished(tag, url)
+
+            if (url.endsWith(".user.js")) {
+                uiModelListener.makeToast("Install this script?", MyToast.LENGTH_LONG)
+                    .setAction("YES") {
+
+                        scope.launch(Dispatchers.IO) {
+                            ignore {
+
+                                val scriptMap = ArrayMap<String, String>()
+
+                                val f = File(
+                                    globalWebViewSetting.externalFilesDir,
+                                    UserScriptFragment.USER_SCRIPT_FILE
+                                )
+                                if (!f.exists()) {
+                                    f.createNewFile()
+                                }
+
+                                f.inputStream().use { input ->
+                                    run {
+
+                                        val buf = Files.readAllBytes(f.toPath())
+
+                                        GlobalWebViewSetting.parseUserScriptFile(buf, scriptMap)
+                                    }
+                                }
+
+                                val url = URL(url)
+                                val urlConn = url.openConnection() as HttpURLConnection
+                                urlConn.apply {
+                                    setRequestProperty(
+                                        "user-agent",
+                                        globalWebViewSetting.user_agent
+                                    )
+                                    setRequestProperty("X-Android-Transports", "h2,http/1.1")
+                                }
+
+                                if (urlConn.responseCode == 200) {
+
+                                    urlConn.inputStream.use {
+
+                                        val buf = it.readNBytesC(Int.MAX_VALUE) ?: return@use
+                                        val us = String(buf)
+                                        val userScript = UserScript.parse(us) ?: return@use
+
+                                        scriptMap["${userScript.name} - ${userScript.namespace}"] =
+                                            us
+
+                                        userScript.match.forEach {
+                                            globalWebViewSetting.userscriptMap[it] = userScript
+                                        }
+
+                                        val f = File(
+                                            globalWebViewSetting.externalFilesDir,
+                                            UserScriptFragment.USER_SCRIPT_FILE
+                                        )
+                                        if (!f.exists()) {
+                                            f.createNewFile()
+                                        }
+                                        f.outputStream().use {
+                                            it.write(
+                                                GlobalWebViewSetting.stringifyUserScriptFile(
+                                                    scriptMap
+                                                ).toByteArray()
+                                            )
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+
+                    }.show()
+            }
         }
+
 
 //                    hideHandler.removeCallbacks(longLoadingHandler)
 

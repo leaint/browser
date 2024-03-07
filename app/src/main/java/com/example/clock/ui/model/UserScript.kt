@@ -46,7 +46,7 @@ data class UserScript(
                         when (item[0]) {
                             "@name" -> name = item[1].trim()
                             "@namespace" -> nameSpace = item[1].trim()
-                            "@match" -> match.add(item[1].trim())
+                            "@match","@include" -> match.add(item[1].trim())
                         }
                     }
                     continue

@@ -236,7 +236,7 @@ fun initFragmentListener(
                     if (loadSettingJob.isActive) {
                         mainScope.launch {
                             loadSettingJob.join()
-                            webViewClient = MyWebViewClient(uiModel, setting)
+                            webViewClient = MyWebViewClient(uiModel, setting, mainScope)
                             webChromeClient =
                                 MyWebChromeClient(uiModel, setting, historyManager)
                             it.webViewClient = webViewClient!!
