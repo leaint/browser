@@ -322,6 +322,9 @@ object WebRequestFilter {
 //                                    urlConn.setRequestProperty("X-Android-Transports", "h2,http/1.1")
 //
 
+                if(urlConn is HttpsURLConnection) {
+                    ConnHelper.setNoSni(urlConn, url)
+                }
 
                 // 所有的 [400, 499] 都会转成 404 错误
                 val responseCode = urlConn.responseCode
@@ -366,8 +369,8 @@ object WebRequestFilter {
                         mime,
                         "utf-8",
                         urlConn.responseCode,
-//                    "ok",
-                        urlConn.responseMessage,
+//                        "ok",
+                        if (urlConn.responseMessage.isNullOrEmpty()) "OK" else urlConn.responseMessage,
                         responseHeaders,
                         bufStream
                     )

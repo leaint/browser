@@ -210,6 +210,62 @@ class ConnHelper {
             return Result.success(urlConn)
         }
 
+        fun setNoSni(urlConn: HttpsURLConnection, url: Uri) {
+            urlConn.setRequestProperty("X-Android-Transports", "h2,http/1.1")
+            urlConn.connect()
+            try {
+                // android.okhttp.internal.huc.HttpsURLConnectionImpl.java
+                // private final HttpURLConnectionImpl delegate;
+                val a = urlConn.javaClass.declaredFields[0]
+                a.isAccessible = true
+
+                // com.android.okhttp.internal.huc.HttpURLConnectionImpl
+                val b = a.get(urlConn)
+
+                //  protected HttpEngine httpEngine;
+                val c = b.javaClass.declaredFields[1]
+
+                c.isAccessible = true
+                // protected com.android.okhttp.internal.http.HttpEngine
+                val cc = c.get(b)
+
+                // private Request networkRequest
+                val qq = cc.javaClass.declaredFields[1]
+                qq.isAccessible = true
+                // private com.android.okhttp.Request com.android.okhttp.internal.http.HttpEngine.networkRequest
+                val qqq = qq.get(cc)
+
+                // private final HttpUrl url;
+                val w = qqq.javaClass.declaredFields[2]
+                w.isAccessible = true
+
+                // class com.android.okhttp.HttpUrl
+                val ww = w.get(qqq)
+
+                //   public static HttpUrl parse(String url){ ... }
+                val q1 = ww.javaClass.declaredMethods[0].invoke(null, url.toString())
+
+                w.set(qqq, q1)
+
+//                    val rr = ww.javaClass.methods[4]
+//                    rr.isAccessible = true
+//                    val w1 = rr.invoke(ww)
+//                    val dd = cc.javaClass.declaredFields[0]
+//                    dd.isAccessible = true
+//
+//                    val ddd = dd.get(cc)
+//
+//                    val ee = ddd.javaClass.declaredFields
+//
+//                    val g = Class::class.java.getDeclaredMethod("getDeclaredMethods")
+//                    val p = g.invoke(w1.javaClass)
+//                    p.toString()
+            } catch (e: Throwable) {
+                Log.w("nosni", url.toString())
+                e.printStackTrace()
+            }
+        }
+
         fun autoRedirect2(urlConn: HttpURLConnection): Result<InputStream> {
 
             try {
