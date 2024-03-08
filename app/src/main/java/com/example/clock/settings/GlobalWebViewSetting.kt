@@ -321,7 +321,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                     val dnss = dns_config.split(',')
                     if (dnss.size == 2) {
                         val (s, port) = dnss
-                        dnsClient = DNSClient(context, lifecycleOwner, s, port.toInt())
+                        dnsClient = DNSClient(context, s, port.toInt())
                     }
 
                     val customDnsList = it.getString(::custom_dns_list.name, null) ?: ""

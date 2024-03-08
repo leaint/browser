@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.net.http.SslError
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -33,7 +34,10 @@ class MyWebViewClient(
         error: WebResourceError?
     ) {
         super.onReceivedError(view, request, error)
+    }
 
+    override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+        return super.onRenderProcessGone(view, detail)
     }
 
     @SuppressLint("WebViewClientOnReceivedSslError")

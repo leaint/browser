@@ -169,6 +169,8 @@ object WebRequestFilter {
                 urlConn.apply {
                     setRequestProperty("user-agent", globalWebViewSetting.user_agent)
                     setRequestProperty("referer", "https://weibo.com/")
+                    setRequestProperty("Cache-Control", "no-store")
+
                     // 使用80端口，http2无效
 //                    setRequestProperty("X-Android-Transports", "h2,http/1.1")
                     requestMethod = request.method

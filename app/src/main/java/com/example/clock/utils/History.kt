@@ -25,7 +25,7 @@ object HistoryList {
     val historyList = ArrayList<HistoryItem>()
 }
 
-class HistoryManager(private val lifecycleOwner: LifecycleOwner, context: Context) :
+class HistoryManager(lifecycleOwner: LifecycleOwner, context: Context) :
     DefaultLifecycleObserver {
     private var historyList = HistoryList.historyList
 
@@ -89,7 +89,7 @@ class HistoryManager(private val lifecycleOwner: LifecycleOwner, context: Contex
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+        owner.lifecycleScope.launch(Dispatchers.IO) {
             if (curSavedHistory < historyList.size) {
 
                 historyDb.beginTransaction()

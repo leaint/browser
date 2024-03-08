@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.TrafficStats
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
 import com.example.clock.internal.DnsPacket
 import com.example.clock.settings.ignore
 import java.io.ByteArrayInputStream
@@ -504,7 +503,7 @@ object BypassSSLSocketFactory {
 
 class DNSClient(
     context: Context,
-    lifecycleOwner: LifecycleOwner,
+//    lifecycleOwner: LifecycleOwner,
     serverAddress: String,
     val port: Int,
     var timeout: Int = 1000
