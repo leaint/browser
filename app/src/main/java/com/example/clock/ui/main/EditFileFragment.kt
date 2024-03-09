@@ -76,11 +76,12 @@ class EditFileFragment : Fragment() {
         editText = inflater.inflate(R.layout.fragment_edit_file, container, false) as EditText
 
         (activity as? ComponentActivity)?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
-        onBackPressedCallback.isEnabled = true
+        onBackPressedCallback.isEnabled = changed
 
         editText.addTextChangedListener {
             if (inited) {
                 changed = true
+                onBackPressedCallback.isEnabled = changed
                 activity?.title = "Edit `$filename` *"
             }
         }
@@ -153,10 +154,22 @@ class EditFileFragment : Fragment() {
 //                parentFragmentManager.popBackStack()
                 activity?.title = "Edit `$filename`"
                 changed = false
+                onBackPressedCallback.isEnabled = changed
                 true
             }
         }
 
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == android.R.id.home) {
+            if (changed) {
+                onBackPressedCallback.handleOnBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     companion object {

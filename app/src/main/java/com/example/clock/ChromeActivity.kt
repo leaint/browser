@@ -906,12 +906,12 @@ class ChromeActivity : FragmentActivity() {
                 setOnMenuItemClickListener {
                     mode.finish()
                     if (selectText.isNotEmpty()) {
-                        if (selectText.startsWith("http")) uiModel.newGroupTab(selectText)
+                        uiModel.newGroupTab(selectText)
                     } else {
                         holderController.currentGroup?.getCurrent()?.webView?.get()?.let {
                             it.evaluateJavascript("window.getSelection().toString()") {
                                 val url = it.trim('"')
-                                if (url.startsWith("http")) uiModel.newGroupTab(url)
+                                uiModel.newGroupTab(url)
                             }
                         }
                     }

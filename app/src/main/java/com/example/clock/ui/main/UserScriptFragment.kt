@@ -298,7 +298,7 @@ class EditUserScriptFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_edit_userscript, container, false) as EditText
 
         (activity as? ComponentActivity)?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
-        onBackPressedCallback.isEnabled = true
+        onBackPressedCallback.isEnabled = changed
         editText = view
         val initText = arguments?.getString(ARG_US)
 
@@ -321,6 +321,7 @@ class EditUserScriptFragment : Fragment() {
         editText.addTextChangedListener {
             activity?.title = "Edit User Script *"
             changed = true
+            onBackPressedCallback.isEnabled = changed
         }
         return view
     }
@@ -339,8 +340,12 @@ class EditUserScriptFragment : Fragment() {
             if (id in SNIPPETS.indices) {
                 editText.append("\n" + SNIPPETS[id].second)
             }
+        } else if (item.itemId == android.R.id.home) {
+            if (changed) {
+                onBackPressedCallback.handleOnBackPressed()
+                return true
+            }
         }
-
         return super.onOptionsItemSelected(item)
     }
 
@@ -365,6 +370,8 @@ class EditUserScriptFragment : Fragment() {
 //                parentFragmentManager.popBackStack()
 
                 changed = false
+                onBackPressedCallback.isEnabled = changed
+
                 true
 
             }
