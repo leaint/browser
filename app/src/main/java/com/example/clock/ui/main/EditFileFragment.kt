@@ -1,5 +1,6 @@
 package com.example.clock.ui.main
 
+import android.app.AlertDialog
 import android.app.Fragment
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.addTextChangedListener
 import com.example.clock.R
 import com.example.clock.SettingsActivity
@@ -30,6 +33,24 @@ class EditFileFragment : Fragment() {
     private var inited = false
     private lateinit var editText: EditText
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            if (changed) {
+                val oo = this
+                AlertDialog.Builder(context).apply {
+                    setTitle("文本内容已改变。要退出吗？")
+                    setPositiveButton(android.R.string.cancel, null)
+                    setNegativeButton(android.R.string.yes) { dialog, which ->
+                        run {
+                            oo.isEnabled = false
+                            activity.onBackPressed()
+                        }
+                    }
+                }.show()
+            }
+        }
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +61,13 @@ class EditFileFragment : Fragment() {
     }
 
     @Deprecated("Deprecated in Java")
+    override fun onDestroyView() {
+        super.onDestroyView()
+        onBackPressedCallback.isEnabled = false
+        onBackPressedCallback.remove()
+    }
+
+    @Deprecated("Deprecated in Java")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,10 +75,13 @@ class EditFileFragment : Fragment() {
         // Inflate the layout for this fragment
         editText = inflater.inflate(R.layout.fragment_edit_file, container, false) as EditText
 
+        (activity as? ComponentActivity)?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
+        onBackPressedCallback.isEnabled = true
+
         editText.addTextChangedListener {
             if (inited) {
                 changed = true
-                activity?.title = "Edit `$filename` Changed"
+                activity?.title = "Edit `$filename` *"
             }
         }
 
@@ -121,6 +152,7 @@ class EditFileFragment : Fragment() {
                 }
 //                parentFragmentManager.popBackStack()
                 activity?.title = "Edit `$filename`"
+                changed = false
                 true
             }
         }

@@ -208,12 +208,8 @@ object WebRequestFilter {
             if (ips.isNotEmpty()) {
 
                 val ip = ips.last()
-                var urlPath = ""
-                if (url.path != null) urlPath += url.encodedPath
-                if (url.query != null) urlPath += "?" + url.encodedQuery
-                if (url.fragment != null) urlPath += "#" + url.encodedFragment
 
-                val reddit = URL(url.scheme, "[$ip]", 443, urlPath)
+                val reddit = URL(url.toString().replace(host, "[$ip]"))
 
                 val urlConn = reddit.openConnection() as HttpsURLConnection
 
@@ -385,10 +381,7 @@ object WebRequestFilter {
                         emptyMap(),
                         bufStream
                     )
-
                 }
-
-
             }
         }
         return null

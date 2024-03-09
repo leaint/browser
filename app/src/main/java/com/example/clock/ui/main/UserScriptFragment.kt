@@ -1,5 +1,6 @@
 package com.example.clock.ui.main
 
+import android.app.AlertDialog
 import android.app.Fragment
 import android.database.DataSetObserver
 import android.os.Bundle
@@ -16,6 +17,8 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.addTextChangedListener
 import com.example.clock.R
 import com.example.clock.SettingsActivity
@@ -96,7 +99,7 @@ class UserScriptFragment : Fragment() {
                 f.createNewFile()
             }
             f.outputStream().use {
-               it.write(GlobalWebViewSetting.stringifyUserScriptFile(scriptMap).toByteArray())
+                it.write(GlobalWebViewSetting.stringifyUserScriptFile(scriptMap).toByteArray())
             }
         }
     }
@@ -254,10 +257,36 @@ class EditUserScriptFragment : Fragment() {
 
     private lateinit var editText: EditText
 
+    private var changed = false
+    private val onBackPressedCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            if (changed) {
+                val oo = this
+                AlertDialog.Builder(context).apply {
+                    setTitle("文本内容已改变。要退出吗？")
+                    setPositiveButton(android.R.string.cancel, null)
+                    setNegativeButton(android.R.string.yes) { dialog, which ->
+                        run {
+                            oo.isEnabled = false
+                            activity.onBackPressed()
+                        }
+                    }
+                }.show()
+            }
+        }
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onDestroyView() {
+        super.onDestroyView()
+        onBackPressedCallback.isEnabled = false
+        onBackPressedCallback.remove()
     }
 
     @Deprecated("Deprecated in Java")
@@ -267,6 +296,9 @@ class EditUserScriptFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_edit_userscript, container, false) as EditText
+
+        (activity as? ComponentActivity)?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
+        onBackPressedCallback.isEnabled = true
         editText = view
         val initText = arguments?.getString(ARG_US)
 
@@ -288,6 +320,7 @@ class EditUserScriptFragment : Fragment() {
         }
         editText.addTextChangedListener {
             activity?.title = "Edit User Script *"
+            changed = true
         }
         return view
     }
@@ -331,6 +364,7 @@ class EditUserScriptFragment : Fragment() {
 
 //                parentFragmentManager.popBackStack()
 
+                changed = false
                 true
 
             }
