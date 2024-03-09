@@ -31,9 +31,8 @@ class PowerEditText : EditText {
 
         super.onDraw(canvas)
 
-        if (lineMapToParagraph.size != layout.lineCount + 1) {
-            updateD(text)
-            return
+        if (lineMapToParagraph.size != layout.lineCount) {
+            lineMapToParagraph = updateD()
         }
 
         canvas.save()
@@ -92,7 +91,7 @@ class PowerEditText : EditText {
 
         canvas.translate(0f, extendedPaddingTop.toFloat())
 
-        if (lineMapToParagraph.size == layout.lineCount + 1) {
+        if (lineMapToParagraph.size == layout.lineCount) {
             for (i in firstLine..lastLine) {
 
                 val top = layout.getLineBaseline(i)
@@ -134,27 +133,20 @@ class PowerEditText : EditText {
 
     private var lineMapToParagraph = IntArray(0)
 
-    private fun updateD(text: CharSequence) {
-        val newLineOffsets = ArrayList<Int>()
-        var idx = text.indexOf('\n')
-        if (idx == -1) {
-            lineMapToParagraph = IntArray(0)
-            return
+    private fun updateD(): IntArray {
+        val lineCount = layout.lineCount
+
+        val lineMap = IntArray(lineCount)
+
+        lineMap[0] = 1
+        var curLine = 1
+        for (i in 1..<lineCount) {
+            if (text[layout.getLineStart(i) - 1] == '\n') {
+                lineMap[i] = ++curLine
+            }
         }
-        val maxIdx = text.length - 1 - 1
-        while (idx in 0..maxIdx) {
-            newLineOffsets.add(idx)
-            idx = text.indexOf('\n', idx + 1)
-        }
-        newLineOffsets.add(text.length - 1)
-        val lineCount = layout?.lineCount ?: 0
-        lineMapToParagraph = IntArray(lineCount + 1)
-        lineMapToParagraph[0] = 1
-        if (lineCount == 0) return
-        for ((i, offset) in newLineOffsets.withIndex()) {
-            val l = layout.getLineForOffset(offset) + 1
-            lineMapToParagraph[l] = i + 2
-        }
+
+        return lineMap
     }
 
     override fun onTextChanged(
@@ -168,6 +160,6 @@ class PowerEditText : EditText {
         text ?: return
         layout ?: return
 
-        updateD(text)
+        lineMapToParagraph = updateD()
     }
 }
