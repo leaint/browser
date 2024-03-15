@@ -277,13 +277,47 @@
         android:layout="@layout/search_box"
         android:visibility="gone" />
 
-    <FrameLayout
+    <com.example.clock.ui.main.GestureFrameLayout
         android:id="@+id/fullscreen_box"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
-    </FrameLayout>
+        <com.example.clock.ui.main.GestureFrameLayout
+            android:id="@+id/fullscreen_view_box"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/video_toolbar_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="16dp"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/lock_screen_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="5dp"
+                android:src="@drawable/outline_lock_open_24"
+                android:tint="#FFFFFF" />
+
+            <ImageView
+                android:id="@+id/rotate_screen_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="5dp"
+                android:src="@drawable/outline_screen_rotation_24"
+                android:tint="#FFFFFF" />
+        </LinearLayout>
+    </com.example.clock.ui.main.GestureFrameLayout>
 
     <LinearLayout
         android:id="@+id/toast_box"

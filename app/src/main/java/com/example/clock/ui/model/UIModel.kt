@@ -2,6 +2,7 @@ package com.example.clock.ui.model
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -89,6 +90,7 @@ interface UIModelListener : FindListener {
     fun showFileChooser(intent: Intent, callback: (result: ActivityResult) -> Unit): Boolean
     fun requestFullscreen(fullscreen: Boolean)
     fun isFullScreen(): Boolean
+    fun setRequestedOrientation(requestedOrientation: Int)
 }
 
 class UIModel(
@@ -99,6 +101,7 @@ class UIModel(
     private val toolBarModel: ToolBarModel,
     private val binding: ActivityChromeBinding,
     private val searchModel: SearchModel,
+    private val fullScreenContainerModel: FullScreenContainerModel,
 ) :
     UIModelListener {
 
@@ -713,20 +716,20 @@ class UIModel(
 
     override fun setFullScreenViewStatus(view: View?, hidden: Boolean) {
         if (hidden) {
-            binding.fullscreenBox.removeAllViews()
-            binding.fullscreenBox.visibility = View.GONE
+            fullScreenContainerModel.exitFullScreen()
             if (!setting.isFullScreen) {
                 requestFullscreen(false)
             }
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
         } else {
-            if (binding.fullscreenBox.childCount > 0) {
-                binding.fullscreenBox.removeAllViews()
-            }
+            view ?: return
+            fullScreenContainerModel.enterFullScreen(view)
+
             if (!setting.isFullScreen) {
                 requestFullscreen(true)
             }
-            binding.fullscreenBox.addView(view)
-            binding.fullscreenBox.visibility = View.VISIBLE
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
         }
     }
 
@@ -1006,6 +1009,11 @@ class UIModel(
     }
 
     override fun isFullScreen() = _isFullScreen
+    override fun setRequestedOrientation(requestedOrientation: Int) {
+        if (fragmentActivity.requestedOrientation != requestedOrientation) {
+            fragmentActivity.requestedOrientation = requestedOrientation
+        }
+    }
 
 }
 

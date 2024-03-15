@@ -52,6 +52,7 @@ import com.example.clock.ui.main.WebViewTransport
 import com.example.clock.ui.model.ADPickViewModel
 import com.example.clock.ui.model.BookMarkModel
 import com.example.clock.ui.model.ExclusiveModel
+import com.example.clock.ui.model.FullScreenContainerModel
 import com.example.clock.ui.model.MainMenuEventListener
 import com.example.clock.ui.model.MainMenuModel
 import com.example.clock.ui.model.MenuEnum
@@ -63,13 +64,16 @@ import com.example.clock.ui.model.UIModel
 import com.example.clock.ui.model.UIModelListener
 import com.example.clock.ui.model.URLEditBarModel
 import com.example.clock.ui.model.URLSuggestionModel
+import com.example.clock.ui.model.VideoToolBarModel
 import com.example.clock.ui.model.initAdPickModel
 import com.example.clock.ui.model.initFragmentListener
+import com.example.clock.ui.model.initFullScreenContainer
 import com.example.clock.ui.model.initSearchModel
 import com.example.clock.ui.model.initTabListModel
 import com.example.clock.ui.model.initTabModel
 import com.example.clock.ui.model.initToolBarModel
 import com.example.clock.ui.model.initURLEditModel
+import com.example.clock.ui.model.initVideoToolBar
 import com.example.clock.utils.HistoryManager
 import com.example.clock.utils.MyToast
 import com.example.clock.utils.SafeURI
@@ -290,6 +294,11 @@ class ChromeActivity : FragmentActivity() {
             override fun onViewDetachedFromWindow(v: View) {}
         })
 
+        val videoToolBarModel = VideoToolBarModel()
+        val fullScreenContainerModel = FullScreenContainerModel()
+
+        initFullScreenContainer(binding, videoToolBarModel, fullScreenContainerModel)
+
         uiModel = UIModel(
             this,
             holderController,
@@ -298,6 +307,7 @@ class ChromeActivity : FragmentActivity() {
             toolBarModel,
             binding,
             searchModel,
+            fullScreenContainerModel,
         )
 
         initFragmentListener(
@@ -347,6 +357,8 @@ class ChromeActivity : FragmentActivity() {
         )
 
         initToolBarModel(this, toolBarModel, urlEditModel, uiModel, holderController, binding)
+
+        initVideoToolBar(binding, videoToolBarModel, uiModel::setRequestedOrientation)
 
         var lastBack = System.currentTimeMillis() - 2000
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
@@ -940,4 +952,5 @@ class ChromeActivity : FragmentActivity() {
             }
         }
     }
+
 }
