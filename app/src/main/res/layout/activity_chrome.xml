@@ -81,6 +81,21 @@
                 android:focusableInTouchMode="true">
 
 
+                <TextView
+                    android:id="@+id/title_textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:minHeight="30dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    tools:text="*11222225555666999888\\441123336*" />
+
                 <com.example.clock.ui.main.NoWarpEditText
                     android:id="@+id/url_edit_text"
                     android:layout_width="match_parent"
@@ -94,6 +109,7 @@
                     android:minHeight="30dp"
                     android:selectAllOnFocus="true"
                     android:textColor="@color/black"
+                    android:visibility="invisible"
                     tools:text="55555555555" />
 
             </FrameLayout>

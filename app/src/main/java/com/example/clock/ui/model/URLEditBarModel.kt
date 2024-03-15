@@ -213,6 +213,9 @@ fun initURLEditModel(
         override fun onStartEdit() {
             binding.urlEditText.isEnabled = true
 
+            binding.urlEditText.visibility = View.VISIBLE
+            binding.titleTextView.visibility = View.INVISIBLE
+
             binding.urlEditText.requestFocus()
             uiModelListener.showIME(binding.urlEditText)
 
@@ -264,6 +267,8 @@ fun initURLEditModel(
                 }
             }
             binding.urlEditText.isEnabled = false
+            binding.urlEditText.visibility = View.INVISIBLE
+            binding.titleTextView.visibility = View.VISIBLE
             toolBarModel.removeCanDoGesture(canDoGestureFun)
             suggestAdapter.clear()
         }
@@ -350,7 +355,7 @@ fun initURLEditModel(
             }.show()
         }
     }
-    binding.urlEditText.setOnClickListener {
+    binding.titleTextView.setOnClickListener {
 //            it.isEnabled = false
 
         if (!urlEditModel.isEditing) {
@@ -432,7 +437,7 @@ fun initURLEditModel(
         }
     }
 
-    binding.urlEditText.setOnLongClickListener {
+    binding.titleTextView.setOnLongClickListener {
 
         if (!urlEditModel.isEditing) {
             urlEditModel.showTool()

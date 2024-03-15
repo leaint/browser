@@ -127,14 +127,17 @@ class UIModel(
             }
 
             WebViewHolder.UPDATE_TITLE -> {
-                if (holderController.currentIdx < binding.tabList.childCount) (binding.tabList[holderController.currentIdx] as? TextView)?.text =
-                    if (isNative) {
-                        h.webView?.get()?.let {
-                            it.title ?: it.url
-                        } ?: ""
-                    } else {
-                        holderController.currentGroup.toString()
-                    }
+                val title = if (isNative) {
+                    h.webView?.get()?.let {
+                        it.title ?: it.url
+                    } ?: ""
+                } else {
+                    holderController.currentGroup.toString()
+                }
+                if (holderController.currentIdx < binding.tabList.childCount) {
+                    (binding.tabList[holderController.currentIdx] as? TextView)?.text = title
+                }
+                binding.titleTextView.text = title
             }
 
             WebViewHolder.UPDATE_URL -> {
@@ -175,14 +178,15 @@ class UIModel(
 
         if (holderController.currentIdx < binding.tabList.childCount) {
             (binding.tabList[holderController.currentIdx] as? TextView)?.let {
-                it.text = if (isNative) {
+                val title = if (isNative) {
                     h.webView?.get()?.let {
                         it.title ?: it.url
                     } ?: ""
                 } else {
                     holderController.currentGroup.toString()
                 }
-
+                it.text = title
+                binding.titleTextView.text = title
                 it.setCompoundDrawables(
                     h.iconBitmapDrawable, null, closeDrawable, null
                 )

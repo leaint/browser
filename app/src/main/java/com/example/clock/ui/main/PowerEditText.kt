@@ -21,7 +21,7 @@ class PowerEditText : EditText {
         paint.style = Paint.Style.FILL
         paint.color = Color.YELLOW
         sTempRect1.set(
-            paddingLeft,
+            0,
             paddingTop + layout.getLineTop(curLine),
             paddingLeft + sTempRect1.right,
             paddingTop + layout.getLineTop(curLine + 1)
