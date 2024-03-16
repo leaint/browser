@@ -45,13 +45,16 @@ class VideoToolBarModel {
 
         isLockOrientation = !isLockOrientation
         videoToolBarListener?.onLockScreenOrientation(
-            if (isLockOrientation) {
-                ActivityInfo.SCREEN_ORIENTATION_LOCKED
-            } else {
-                ActivityInfo.SCREEN_ORIENTATION_SENSOR
-            }
+            mapOrientation(isLockOrientation)
         )
     }
+
+    private fun mapOrientation(isLockOrientation: Boolean): Int =
+        if (isLockOrientation) {
+            ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR
+        }
 
     fun lockScreen() {
         isLocked = !isLocked
@@ -59,10 +62,10 @@ class VideoToolBarModel {
     }
 
     fun reset() {
-        if (isLocked) {
-            lockScreen()
-        }
+        isLocked = false
         isLockOrientation = false
+        videoToolBarListener?.onLockScreen(isLocked)
+        videoToolBarListener?.onLockScreenOrientation(mapOrientation(isLockOrientation))
     }
 }
 

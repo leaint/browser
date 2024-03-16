@@ -32,14 +32,13 @@ fun initFullScreenContainer(
             }
 
             binding.fullscreenViewBox.addView(view)
-            binding.fullscreenBox.visibility = View.VISIBLE
             videoToolBarModel.reset()
+            binding.fullscreenBox.visibility = View.VISIBLE
         }
 
         override fun onExitFullScreen() {
             binding.fullscreenViewBox.removeAllViews()
             binding.fullscreenBox.visibility = View.GONE
-            videoToolBarModel.reset()
         }
 
     }
