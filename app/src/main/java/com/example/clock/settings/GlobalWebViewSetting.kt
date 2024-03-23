@@ -113,6 +113,13 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
     val JUMP_URI = "http://78.jump.to"
     var ruleChanged = false
     var can_copy = true
+    var enable_debug = false
+
+    var proxy_prefix_url = ""
+    var using_inner_proxy = false
+
+    var useProxy = false
+        get() = using_inner_proxy && proxy_prefix_url.isNotEmpty()
 
     var isFullScreen = true
 
@@ -305,6 +312,11 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                     start_page = it.getString(::start_page.name, null) ?: start_page
                     user_agent = it.getString(::user_agent.name, null) ?: user_agent
                     can_copy = it.getBoolean(::can_copy.name, can_copy)
+                    enable_debug = it.getBoolean(::enable_debug.name, enable_debug)
+                    proxy_prefix_url =
+                        it.getString(::proxy_prefix_url.name, null) ?: proxy_prefix_url
+                    using_inner_proxy = it.getBoolean(::using_inner_proxy.name, using_inner_proxy)
+
                     cache_navigation = it.getBoolean(::cache_navigation.name, false)
                     val cachedTabCountStr =
                         it.getString(::cached_tab_count.name, null) ?: "$cached_tab_count"

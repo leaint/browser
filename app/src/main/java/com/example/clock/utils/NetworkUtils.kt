@@ -147,7 +147,7 @@ class ConnHelper {
                 }
         */
 
-        fun build(url: Uri, dnsClient: DNSClient): Result<URLConnection> {
+        fun build(url: Uri, dnsClient: DNSClient, proxyUrl: String?): Result<URLConnection> {
             TrafficStats.setThreadStatsTag(776)
 
             val host = url.host ?: return Result.failure(Exception("Host can't be null."))
@@ -173,13 +173,22 @@ class ConnHelper {
 
             var domain = ip
             var port = 80
-            if (url.scheme == "https") {
-                port = 443
-            }
+
             if (ip.contains(':'))
                 domain = "[$ip]"
 
-            val reddit = URL(url.toString().replace(host, domain))
+            val useProxy = !proxyUrl.isNullOrEmpty()
+
+            val targetUrl = if (useProxy) {
+                proxyUrl + url.toString().replace(host, domain)
+            } else {
+                url.toString().replace(host, domain)
+            }
+
+            val reddit = URL(targetUrl)
+            if (reddit.protocol == "https") {
+                port = 443
+            }
             val urlConn = reddit.openConnection() as HttpURLConnection
             with(urlConn) {
                 instanceFollowRedirects = false

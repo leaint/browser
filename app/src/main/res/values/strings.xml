@@ -62,4 +62,8 @@
     <string name="extension_header">Extension</string>
     <string name="app_name_beta">Clock</string>
     <string name="title_activity_chrome_beta">ChromeActivity</string>
+    <string name="title_other">Other</string>
+    <string name="enable_debug">WebView debug</string>
+    <string name="proxy_prefix_url_title">Proxy URL</string>
+    <string name="using_inner_proxy_title">Using inner proxy</string>
 </resources>

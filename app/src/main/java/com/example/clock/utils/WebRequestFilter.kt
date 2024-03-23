@@ -305,12 +305,23 @@ object WebRequestFilter {
 
             val url = request.url
             ignore {
-                var urlConn = ConnHelper.build(url, globalWebViewSetting.dnsClient)
+                val useProxy = globalWebViewSetting.useProxy
+                var urlConn = ConnHelper.build(
+                    url,
+                    globalWebViewSetting.dnsClient,
+                    if (useProxy)
+                        globalWebViewSetting.proxy_prefix_url
+                    else null
+                )
                     .getOrThrow() as HttpURLConnection
 
                 request.requestHeaders.forEach { (t, u) ->
                     if (t != "Accept-Encoding")
                         urlConn.setRequestProperty(t, u)
+                }
+
+                if (useProxy) {
+                    urlConn.setRequestProperty("X-Host", url.host)
                 }
 
 //                                    val cacheRes = HttpResponseCache.getInstalled().get(URI.create(urlConn.url.toString()), request.method, urlConn.requestProperties)

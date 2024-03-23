@@ -329,6 +329,7 @@ fun initTabListModel(
         }
 
         var offsetX = 0
+        var viewWidth = 0
         setOnItemClickListener { parent, view, position, id ->
             run {
 
@@ -336,9 +337,10 @@ fun initTabListModel(
                     return@run
                 }
 //                val closeBtn = view.findViewById<View>(R.id.close_tab)
-                if (offsetX == 0) {
+                if (offsetX == 0 || viewWidth != view.width) {
                     val view = view.findViewById<TextView>(R.id.tab_title)
-                    offsetX = view.width - closeDrawable.bounds.width() - view.totalPaddingEnd
+                    viewWidth = view.width
+                    offsetX = viewWidth - closeDrawable.bounds.width() - view.totalPaddingEnd
                 }
                 if (lastX > offsetX) {
                     uiModelListener.closeTab(position)

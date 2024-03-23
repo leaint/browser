@@ -208,7 +208,6 @@ class ChromeActivity : FragmentActivity() {
             e.message?.let { Log.e("WebView", it) }
         }
 
-        WebView.setWebContentsDebuggingEnabled(true)
 
         setting = GlobalWebViewSetting(this@ChromeActivity, this@ChromeActivity)
 
@@ -225,6 +224,11 @@ class ChromeActivity : FragmentActivity() {
         loadSettingJob = mainScope.launch(Dispatchers.IO) {
             setting.loadSetting(this@ChromeActivity)
 
+            if (setting.enable_debug) {
+                withContext(Dispatchers.Main) {
+                    WebView.setWebContentsDebuggingEnabled(true)
+                }
+            }
             holderController.currentGroup?.getCurrent()?.loadingUrl = setting.INIT_URI
 
             setting.reloadBookMark(this@ChromeActivity)

@@ -40,15 +40,15 @@
         <!--             />-->
 
         <Preference
+            android:fragment="com.example.clock.ui.main.EditFileFragment"
             android:key="ad_rule"
             android:title="@string/ad_rule"
-            android:fragment="com.example.clock.ui.main.EditFileFragment"
             android:widgetLayout="@layout/preference_goto" />
 
         <Preference
+            android:fragment="com.example.clock.ui.main.EditUserScriptFragment"
             android:key="user_script"
             android:title="@string/user_script"
-            android:fragment="com.example.clock.ui.main.EditUserScriptFragment"
             android:widgetLayout="@layout/preference_goto" />
 
     </PreferenceCategory>
@@ -60,9 +60,9 @@
             android:title="@string/replace_title" />
 
         <Preference
+            android:fragment="com.example.clock.ui.main.EditFileFragment"
             android:key="replace_rule"
             android:title="@string/replace_rule"
-            android:fragment="com.example.clock.ui.main.EditFileFragment"
             android:widgetLayout="@layout/preference_goto" />
 
         <EditTextPreference
@@ -73,6 +73,15 @@
             android:key="custom_dns_list"
             android:title="@string/custom_dns_title" />
 
+        <SwitchPreference
+            android:key="using_inner_proxy"
+            android:title="@string/using_inner_proxy_title"
+            android:defaultValue="false"/>
+
+        <EditTextPreference
+            android:dependency="using_inner_proxy"
+            android:key="proxy_prefix_url"
+            android:title="@string/proxy_prefix_url_title" />
 
         <SwitchPreference
             android:key="cache_navigation"
@@ -90,6 +99,12 @@
             android:summaryOn="@string/attachment_summary_on"
             android:title="@string/attachment_title" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/title_other">
+        <SwitchPreference
+            android:key="enable_debug"
+            android:title="@string/enable_debug" />
     </PreferenceCategory>
 
 </PreferenceScreen>
