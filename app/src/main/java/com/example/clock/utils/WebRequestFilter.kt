@@ -334,7 +334,12 @@ object WebRequestFilter {
                 val responseCode = urlConn.responseCode
                 if (responseCode !in 300..399 || !request.isForMainFrame) {
                     if (responseCode in 300..399) {
-                        urlConn = ConnHelper.autoRedirect1(urlConn, globalWebViewSetting.dnsClient)
+                        urlConn = ConnHelper.autoRedirect1(
+                            urlConn, globalWebViewSetting.dnsClient,
+                            if (useProxy)
+                                globalWebViewSetting.proxy_prefix_url
+                            else null
+                        )
                             .getOrThrow() as HttpURLConnection
                     }
 //                    if (urlConn.headerFields["content-encoding"]?.getOrNull(0)

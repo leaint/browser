@@ -192,7 +192,6 @@ class ConnHelper {
             val urlConn = reddit.openConnection() as HttpURLConnection
             with(urlConn) {
                 instanceFollowRedirects = false
-//                connectTimeout = 5000
                 setRequestProperty("Host", host)
 //                setRequestProperty("Connection", "keep-alive")
 //                setRequestProperty("Accept-Encoding", "gzip")
@@ -201,7 +200,7 @@ class ConnHelper {
                     "Accept-Language",
                     "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"
                 )
-                connectTimeout = 20_000
+//                connectTimeout = 20_000
             }
 
             if (port == 443) {
@@ -263,10 +262,11 @@ class ConnHelper {
         }
 
         // 内部跳转不改变url，不可行
-        fun autoRedirect1(urlConn: HttpURLConnection, dnsClient: DNSClient): Result<URLConnection> {
+        fun autoRedirect1(urlConn: HttpURLConnection, dnsClient: DNSClient, proxyUrl: String?): Result<URLConnection> {
 
             if (urlConn.responseCode in 300..399) {
                 try {
+                    val useProxy = !proxyUrl.isNullOrEmpty()
                     var maxRedirect = 10
                     var c: HttpURLConnection = urlConn
                     while (maxRedirect-- > 0 && c.responseCode in 300..399) {
@@ -291,7 +291,12 @@ class ConnHelper {
                                 ips = "[${ip.last()}]"
                             }
                             val prevHost = u.host
-                            u = URL(location[0].replace(u.host, ips))
+                            val targetUrl = if (useProxy) {
+                                proxyUrl + location[0].replace(u.host, ips)
+                            } else {
+                                location[0].replace(u.host, ips)
+                            }
+                            u = URL(targetUrl)
                             c.inputStream.close()
                             c = u.openConnection() as HttpURLConnection
                             with(c) {
@@ -300,6 +305,10 @@ class ConnHelper {
                                 setRequestProperty("Host", prevHost)
 //                                setRequestProperty("Accept-Encoding", "gzip")
                                 setRequestProperty("Cache-Control", "max-stale=600")
+
+                                if (useProxy) {
+                                    setRequestProperty("X-Host", prevHost)
+                                }
                             }
                             if (u.protocol == "https") {
                                 with(c as HttpsURLConnection) {
