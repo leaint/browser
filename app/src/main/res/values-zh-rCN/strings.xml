@@ -46,4 +46,5 @@
     <string name="enable_debug">调试WebView</string>
     <string name="proxy_prefix_url_title">代理地址</string>
     <string name="using_inner_proxy_title">使用内部代理</string>
+    <string name="allow_auto_redirect">允许自动跳转</string>
 </resources>

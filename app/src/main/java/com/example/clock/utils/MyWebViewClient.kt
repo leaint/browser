@@ -266,6 +266,12 @@ class MyWebViewClient(
 
             val requestHost = request.url.authority
 
+            val currentSiteSetting = globalWebViewSetting.siteSettings[host]
+
+            if (currentSiteSetting?.allow_auto_redirect == true) {
+                return false
+            }
+
             if (!request.hasGesture() && (domainRoot == null || requestHost != null && !J.endsWith(
                     requestHost,
                     domainRoot
@@ -293,7 +299,7 @@ class MyWebViewClient(
             if (domainRoot == null || requestHost == null || !J.endsWith(
                     requestHost,
                     domainRoot
-                ) && globalWebViewSetting.siteSettings[host]?.allow_go_outside == false
+                ) && currentSiteSetting?.allow_go_outside == false
             ) {
                 uiModelListener.makeToast(
                     J.concat("Go to:\n", urlStr),
@@ -335,7 +341,7 @@ class MyWebViewClient(
 
             return if (host != null) {
                 val siteCacheNavigation =
-                    globalWebViewSetting.siteSettings[host]?.cache_navigation
+                    currentSiteSetting?.cache_navigation
                 if (siteCacheNavigation == null && globalWebViewSetting.cache_navigation || siteCacheNavigation == true) {
                     if (tag != -1) {
                         uiModelListener.clearForwardTab(tag)

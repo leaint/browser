@@ -27,6 +27,7 @@ import com.example.clock.R
 import com.example.clock.databinding.ActivityChromeBinding
 import com.example.clock.settings.GlobalWebViewSetting
 import com.example.clock.tab.manager.HolderController
+import com.example.clock.ui.main.WebViewTag
 import com.example.clock.utils.MyToast
 import com.example.clock.utils.getClipText
 import kotlinx.coroutines.channels.BufferOverflow
@@ -294,7 +295,9 @@ fun initURLEditModel(
             }
             val webViewHolder =
                 holderController.currentGroup?.getCurrent() ?: throw KotlinNullPointerException()
-            webViewHolder.webView?.get()?.loadUrl(url)
+            (webViewHolder.webView?.get()?.tag as? WebViewTag)?.let {
+                uiModelListener.newTab(url, it.tag)
+            }
         }
 
         override fun onExpand() {

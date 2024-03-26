@@ -66,4 +66,5 @@
     <string name="enable_debug">WebView debug</string>
     <string name="proxy_prefix_url_title">Proxy URL</string>
     <string name="using_inner_proxy_title">Using inner proxy</string>
+    <string name="allow_auto_redirect">Allow auto redirect</string>
 </resources>

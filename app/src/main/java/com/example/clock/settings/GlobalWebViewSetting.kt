@@ -107,6 +107,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
     var cached_tab_count = 8
     var cache_navigation = false
     var allow_go_outside = true
+    var allow_auto_redirect = false
     var INIT_URI = start_page
     var dns_config = "127.0.0.1,20053"
     var custom_dns_list = ArrayList<String>()
@@ -470,6 +471,9 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                                     } else if (SiteSetting::allow_go_outside.name in keys) {
                                         thisSiteSetting.allow_go_outside =
                                             it.getBoolean(::allow_go_outside.name, true)
+                                    } else if (SiteSetting::allow_auto_redirect.name in keys) {
+                                        thisSiteSetting.allow_auto_redirect =
+                                            it.getBoolean(::allow_auto_redirect.name, false)
                                     } else {
                                         Unit
                                     }

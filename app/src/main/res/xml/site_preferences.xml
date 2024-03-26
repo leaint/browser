@@ -29,5 +29,10 @@
             android:key="allow_go_outside"
             android:title="@string/allow_go_outside" />
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="allow_auto_redirect"
+            android:title="@string/allow_auto_redirect" />
+
     </PreferenceCategory>
 </PreferenceScreen>
