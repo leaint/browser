@@ -1,5 +1,6 @@
 package com.example.clock.ui.main
 
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -56,31 +57,37 @@ class HistoryFragment : Fragment() {
     private var db: SQLiteDatabase? = null
 
     private fun updateTime() {
-        pageViewModel?.history?.value?.getOrNull(binding.longList.firstVisiblePosition)
-            ?.let {
+        val historyEntry =
+            pageViewModel?.history?.value?.getOrNull(binding.longList.firstVisiblePosition)
 
-                val offset = (System.currentTimeMillis() - it.time) / 1000
+        if (historyEntry == null) {
+            binding.sectionLabel.text = ""
+        }
 
-                val s = if (offset < 60) {
-                    "刚刚"
-                } else if (offset < 3600) {
-                    "${offset / 60} 分钟前"
-                } else if (offset < 86400) {
-                    "${offset / 3600} 小时前"
-                } else {
-                    "${offset / 86400} 天前 " +
-                            timeFormatter.format(
-                                LocalDateTime.ofEpochSecond(
-                                    it.time / 1000,
-                                    0,
-                                    ZoneOffset.of("+8")
-                                )
+        historyEntry?.let {
+
+            val offset = (System.currentTimeMillis() - it.time) / 1000
+
+            val s = if (offset < 60) {
+                "刚刚"
+            } else if (offset < 3600) {
+                "${offset / 60} 分钟前"
+            } else if (offset < 86400) {
+                "${offset / 3600} 小时前"
+            } else {
+                "${offset / 86400} 天前 " +
+                        timeFormatter.format(
+                            LocalDateTime.ofEpochSecond(
+                                it.time / 1000,
+                                0,
+                                ZoneOffset.of("+8")
                             )
-                }
-
-
-                binding.sectionLabel.text = s
+                        )
             }
+
+
+            binding.sectionLabel.text = s
+        }
     }
 
     override fun onCreateView(
@@ -253,7 +260,71 @@ class HistoryFragment : Fragment() {
             }
         }
 
-        binding.longList.isFastScrollEnabled
+
+        binding.toolBox.apply {
+            layoutResource = R.layout.history_tool
+
+            setOnInflateListener { stub, inflated ->
+                run {
+                    inflated?.let {
+                        it.findViewById<TextView>(R.id.clear_history_btn)?.let {
+
+                            it.setOnClickListener {
+                                var offset = 0
+                                var invert = false
+                                with(AlertDialog.Builder(this@HistoryFragment.requireContext())) {
+                                    setTitle(R.string.clear_history)
+                                    setSingleChoiceItems(
+                                        arrayOf(
+                                            "一小时内",
+                                            "一天内",
+                                            "一周内",
+                                            "三十天内",
+                                            "六十天前",
+                                            "全部时间"
+                                        ),
+                                        0
+                                    ) { _, which ->
+                                        run {
+                                            offset = when (which) {
+                                                0 -> 1
+                                                1 -> 1 * 24
+                                                2 -> 7 * 24
+                                                3 -> 30 * 24
+                                                4 -> {
+                                                    invert = true
+                                                    60 * 24
+                                                }
+                                                5 -> -1
+                                                else -> 0
+                                            }
+                                        }
+                                    }
+                                    setPositiveButton(android.R.string.ok) { _, _ ->
+                                        run {
+                                            pageViewModel?.clearHistory(offset, invert)
+                                            if (offset != 0) {
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "Cleared",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                pageViewModel?._keyword?.value = ""
+                                            }
+                                        }
+                                    }
+                                    setNegativeButton(android.R.string.cancel, null)
+
+                                    create()
+                                }.show()
+                            }
+                        }
+                    }
+                }
+            }
+            inflate()
+        }
+
 
         return root
     }

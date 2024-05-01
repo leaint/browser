@@ -33,119 +33,8 @@ import javax.net.ssl.X509TrustManager
 class ConnHelper {
 
     companion object {
-        /*
-                val bypassClient = OkHttpClient.Builder()
-                    .sslSocketFactory(BypassSSLSocketFactory.sslSocketFactory, BypassTrustManager())
-                    .hostnameVerifier { _, _ -> true }
-                    .followRedirects(false)
-                    .build()
 
-
-
-                fun build2(
-                    url: Uri,
-                    headers: Map<String, String>,
-                    dnsClient: DNSClient
-                ): Result<Response> {
-                    val h = headers.toMutableMap()
-                    h.remove("Accept-Encoding")
-                    h.remove("Transfer-Encoding")
-                    h.remove("Connection")
-                    val host = url.host ?: return Result.failure(Exception("Host can't be null."))
-
-                    var ips = dnsClient.query(
-                        host,
-                        DNSClient.IP_TYPE.IPV6
-                    )
-
-                    if (ips.isEmpty()) {
-                        ips = dnsClient.query(
-                            host,
-                            DNSClient.IP_TYPE.IPV4
-                        )
-                    }
-
-                    if (ips.isEmpty()) return Result.failure(Throwable("empty dns ${url.host}"))
-
-                    val ip = ips.last()
-                    var urlPath = ""
-                    if (url.path != null)
-                        urlPath += url.encodedPath
-                    if (url.query != null)
-                        urlPath += "?" + url.encodedQuery
-                    if (url.fragment != null)
-                        urlPath += "#" + url.encodedFragment
-
-                    var domain = ip
-                    var port = 80
-                    if (url.scheme == "https") {
-                        port = 443
-                    }
-                    if (ip.contains(':'))
-                        domain = "[$ip]"
-
-                    val reddit = URL(url.scheme, domain, port, urlPath)
-
-                    val req = Request.Builder()
-                        .url(reddit)
-                        .headers(h.toHeaders())
-                        .header("Host", host)
-                        .build()
-
-                    val res = bypassClient.newCall(req).execute()
-
-                    if (res.code in 300..399) {
-                        try {
-                            var maxRedirect = 10
-
-                            var r = res
-                            while (maxRedirect-- > 0 && r.code in 300..399) {
-                                val location = r.headers("location")
-                                if (location.isNotEmpty()) {
-                                    val u = URL(location[0])
-                                    var ips: String
-                                    var ip = dnsClient.query(
-                                        u.host,
-                                        DNSClient.IP_TYPE.IPV6
-                                    )
-                                    if (ip.isEmpty()) {
-                                        ip = dnsClient.query(
-                                            u.host,
-                                            DNSClient.IP_TYPE.IPV4
-                                        )
-                                        if (ip.isEmpty()) {
-                                            throw UnknownError("empty dns answer ${u.host}")
-                                        }
-                                        ips = ip.last()
-                                    } else {
-                                        ips = "[${ip.last()}]"
-                                    }
-
-                                    val req = Request.Builder()
-                                        .url(location[0].replace(u.host, ips))
-                                        .header("Host", u.host)
-                                        .build()
-                                    r.close()
-                                    r = bypassClient.newCall(req).execute()
-
-                                } else {
-                                    break
-                                }
-                            }
-                            if (r.code in 300..399) {
-                                r.close()
-                                throw Exception("Too many redirect or bad ${r.code} redirect!")
-                            }
-                            return Result.success(r)
-                        } catch (e: Exception) {
-                            return Result.failure(e)
-                        }
-                    }
-
-                    return Result.success(res)
-
-                }
-        */
+        val hostnameVerifier = HostnameVerifier { _, _ -> true }
 
         fun build(url: Uri, dnsClient: DNSClient, proxyUrl: String?): Result<URLConnection> {
             TrafficStats.setThreadStatsTag(776)
@@ -210,8 +99,7 @@ class ConnHelper {
 
 //                con.sslSocketFactory = MySSLSocketFactory.instance
                 con.sslSocketFactory = BypassSSLSocketFactory.sslSocketFactory
-                con.hostnameVerifier =
-                    HostnameVerifier { _, _ -> true }
+                con.hostnameVerifier = hostnameVerifier
 
             }
 
@@ -314,8 +202,7 @@ class ConnHelper {
                                 with(c as HttpsURLConnection) {
 
                                     sslSocketFactory = BypassSSLSocketFactory.sslSocketFactory
-                                    hostnameVerifier =
-                                        HostnameVerifier { _, _ -> true }
+                                    hostnameVerifier = hostnameVerifier
                                 }
                             }
                         } else {

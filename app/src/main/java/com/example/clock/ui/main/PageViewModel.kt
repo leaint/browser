@@ -1,6 +1,7 @@
 package com.example.clock.ui.main
 
 import android.database.sqlite.SQLiteDatabase
+import androidx.core.database.sqlite.transaction
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -83,6 +84,29 @@ class HistoryViewModel(
 
     fun setIndex(index: Int) {
         _index.value = index
+    }
+
+    /**
+     * @param offset hour
+     */
+    fun clearHistory(offset: Int, invert: Boolean = false ) {
+
+        if (offset > 0) {
+            val time = System.currentTimeMillis() - 60 * 60 * 1000L * offset
+            val invertClause = if (invert)  "<"  else  ">"
+            db.transaction {
+                delete(
+                    HistoryTable.HistoryEntry.TABLE_NAME,
+                    "${HistoryTable.HistoryEntry._ID} $invertClause ?",
+                    arrayOf(time.toString())
+                )
+            }
+
+        } else if (offset == -1) {
+            db.transaction {
+                delete(HistoryTable.HistoryEntry.TABLE_NAME, null, null)
+            }
+        }
     }
 
     companion object {

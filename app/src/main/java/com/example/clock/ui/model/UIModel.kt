@@ -57,7 +57,15 @@ interface UIModelListener : FindListener {
     fun onPageFinished(tag: Int, url: String)
     fun runOnUiThread(action: Runnable)
     fun redirectTo(newUrl: String, tag: Int)
+
+    /**
+     * 添加标签页
+     */
     fun newTab(initUrl: String, tag: Int)
+
+    /**
+     * 添加标签组
+     */
     fun addTab(idx: Int = -1)
     fun closeTab(position: Int)
     fun newGroupTab(h: WebViewHolder, background: Boolean = false)
@@ -274,6 +282,11 @@ class UIModel(
     }
 
     override fun goBackOrClose(): Boolean {
+
+        if(supportFragmentManager.isStateSaved)  {
+            return true
+        }
+
         val curG = holderController.currentGroup
         val h = curG?.getCurrent() ?: throw KotlinNullPointerException()
 
