@@ -21,6 +21,14 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders["build_type"] = "_beta"
+            if (System.getenv("GITHUB_ACTIONS") == "true") {
+                isMinifyEnabled = true
+                isShrinkResources = true
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+            }
         }
         release {
 
