@@ -172,7 +172,7 @@ fun initURLEditModel(
 //    }
 
     binding.expandBtn.movementMethod = LinkMovementMethod.getInstance()
-    val spannableString = SpannableStringBuilder("http:// https:// <-  ->  ⋀ ").apply {
+    val spannableString = SpannableStringBuilder("http:// https:// <-  ->  x  ⋀ ").apply {
         setSpan(object : ClickableSpan() {
             override fun onClick(widget: View) {
                 binding.urlEditText.editableText?.let {
@@ -202,13 +202,21 @@ fun initURLEditModel(
         }, 21, 23, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         setSpan(object : ClickableSpan() {
             override fun onClick(widget: View) {
-                urlEditModel.toggleExpand()
+                binding.urlEditText.editableText.clear()
             }
         }, 24, 27, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                urlEditModel.toggleExpand()
+            }
+        }, 28, 30, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
     binding.expandBtn.setText(spannableString, TextView.BufferType.SPANNABLE)
     val canDoGestureFun = { !urlEditModel.isEditing }
+
+    val searchChannel =
+        Channel<String>(Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     urlEditModel.urlEditEventListener = object : URLEditEvent {
         override fun onStartEdit() {
@@ -239,6 +247,8 @@ fun initURLEditModel(
             }
 
             toolBarModel.addCanDoGesture(canDoGestureFun)
+
+            searchChannel.trySend("")
         }
 
         override fun onExitEdit() {
@@ -367,9 +377,6 @@ fun initURLEditModel(
 ////                urlEditModel.cancelEdit()
 //            }
 //        }
-
-    val searchChannel =
-        Channel<String>(Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     lifecycleOwner.lifecycleScope.launch {
         while (isActive) {
