@@ -225,6 +225,7 @@ fun initURLEditModel(
             binding.urlEditToolbox.apply {
                 alpha = 0f
                 visibility = View.VISIBLE
+                animate().alpha(1f)
             }
 
 //            binding.urlEditToolbox.visibility = View.VISIBLE
@@ -253,8 +254,6 @@ fun initURLEditModel(
                 }
             }
             exclusiveModel.cancelCallback(urlEditModel.hashCode())
-
-            binding.urlEditToolbox.visibility = View.GONE
 
             binding.toolbarBox.children.forEach {
                 if (it != binding.loadingBox) {
