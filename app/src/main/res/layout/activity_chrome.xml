@@ -38,6 +38,16 @@
         android:translationY="-6dip"
         android:visibility="gone" />
 
+    <AbsoluteLayout
+        android:id="@+id/mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/fullscreen_content_controls"
+        android:visibility="gone"
+        android:background="@color/mask_color"
+        android:clickable="true"
+        tools:visibility="visible" />
+
     <com.example.clock.ui.main.GestureAbsoluteLayout
         android:id="@+id/fullscreen_content_controls"
         android:layout_width="match_parent"
@@ -158,7 +168,6 @@
         android:layout_height="match_parent"
         android:layout_above="@id/fullscreen_content_controls"
         android:layout_alignParentEnd="true"
-        android:background="#40000000"
         android:clickable="true"
         android:minWidth="20dp"
         android:minHeight="30dp"
@@ -198,7 +207,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/fullscreen_content_controls"
-        android:background="#40000000"
         android:gravity="bottom"
         android:visibility="gone"
         tools:visibility="visible">
@@ -239,7 +247,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/fullscreen_content_controls"
-        android:background="#40000000"
         android:gravity="bottom"
         android:orientation="vertical"
         android:visibility="gone"

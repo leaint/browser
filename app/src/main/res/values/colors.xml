@@ -16,4 +16,5 @@
     <color name="black_overlay">#66000000</color>
     <color name="thumb">#686868</color>
     <color name="view_background">@android:color/system_neutral1_50</color>
+    <color name="mask_color">#40000000</color>
 </resources>

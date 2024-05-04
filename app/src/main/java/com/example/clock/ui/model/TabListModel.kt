@@ -405,9 +405,6 @@ fun initTabListModel(
 //        duration = 160
 //    }
 
-    binding.tablistBox.animate().apply {
-        duration = 150
-    }
     tabListModel.tabListEventListener = object : TabListEventListener {
         override fun onCloseTabList() {
             if (binding.tablistBox.visibility == View.VISIBLE) {
@@ -433,9 +430,7 @@ fun initTabListModel(
 //                binding.tablistBox.setBackgroundColor(Color.TRANSPARENT)
                 binding.tablistBox.alpha = 0f
                 binding.tablistBox.visibility = View.VISIBLE
-                binding.tablistBox.post {
-                    binding.tablistBox.animate().alpha(1f)
-                }
+                binding.tablistBox.animate().alpha(1f)
             }
 
         }

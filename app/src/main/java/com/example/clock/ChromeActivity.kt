@@ -55,6 +55,7 @@ import com.example.clock.ui.model.ExclusiveModel
 import com.example.clock.ui.model.FullScreenContainerModel
 import com.example.clock.ui.model.MainMenuEventListener
 import com.example.clock.ui.model.MainMenuModel
+import com.example.clock.ui.model.MaskModel
 import com.example.clock.ui.model.MenuEnum
 import com.example.clock.ui.model.NavigationChangedModel
 import com.example.clock.ui.model.SearchModel
@@ -178,7 +179,7 @@ class ChromeActivity : FragmentActivity() {
 
     private val navigationChangedModel = NavigationChangedModel()
 
-    private val exclusiveModel = ExclusiveModel()
+    private lateinit var exclusiveModel: ExclusiveModel
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -335,6 +336,9 @@ class ChromeActivity : FragmentActivity() {
         )
 
         uiModel.requestFullscreen(setting.isFullScreen)
+
+        val maskModel = MaskModel(binding.mask)
+        exclusiveModel = ExclusiveModel(maskModel)
 
         initTabListModel(
             this,
@@ -497,10 +501,10 @@ class ChromeActivity : FragmentActivity() {
 //                binding.menuBox.setBackgroundColor(Color.TRANSPARENT)
                 binding.menuBox.alpha = 0f
 
-                binding.menuBox.animate().alpha(1f).apply {
-                    duration = 150
-                }
                 binding.menuBox.visibility = View.VISIBLE
+
+                binding.menuBox.animate().alpha(1f)
+
 
 //                binding.menuBox.animate().alpha(1)
             }
@@ -865,11 +869,8 @@ class ChromeActivity : FragmentActivity() {
             }
         }
 
-        binding.menuBox.animate().alpha(0f).apply {
-            duration = 150
-        }.withEndAction {
+        binding.menuBox.animate().alpha(0f).withEndAction {
             mainMenuModel.hideMenu()
-
         }
     }
 
