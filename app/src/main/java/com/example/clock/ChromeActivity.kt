@@ -672,7 +672,7 @@ class ChromeActivity : FragmentActivity() {
                                         )
                                         pendingDelete.add(
                                             File(
-                                                this@ChromeActivity.cacheDir, "http"
+                                                this@ChromeActivity.cacheDir, "HttpResponseCache"
                                             )
                                         )
                                     }
