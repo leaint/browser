@@ -430,7 +430,7 @@ fun initTabListModel(
 //                binding.tablistBox.setBackgroundColor(Color.TRANSPARENT)
                 binding.tablistBox.alpha = 0f
                 binding.tablistBox.visibility = View.VISIBLE
-                binding.tablistBox.animate().alpha(1f)
+                binding.tablistBox.animate().setDuration(150).alpha(1f)
             }
 
         }

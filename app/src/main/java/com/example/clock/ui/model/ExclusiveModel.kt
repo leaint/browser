@@ -36,7 +36,7 @@ class MaskModel(private val view: View) {
         if (view.visibility != View.VISIBLE) {
             view.alpha = 0f
             view.visibility = View.VISIBLE
-            view.animate().alpha(1f).startDelay = 50
+            view.animate().setDuration(150).setStartDelay(50).alpha(1f)
 
         }
     }

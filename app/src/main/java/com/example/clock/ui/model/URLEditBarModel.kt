@@ -225,7 +225,7 @@ fun initURLEditModel(
             binding.urlEditToolbox.apply {
                 alpha = 0f
                 visibility = View.VISIBLE
-                animate().alpha(1f)
+                animate().setDuration(150).alpha(1f)
             }
 
 //            binding.urlEditToolbox.visibility = View.VISIBLE

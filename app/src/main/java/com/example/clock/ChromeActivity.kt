@@ -503,7 +503,7 @@ class ChromeActivity : FragmentActivity() {
 
                 binding.menuBox.visibility = View.VISIBLE
 
-                binding.menuBox.animate().alpha(1f)
+                binding.menuBox.animate().setDuration(150).alpha(1f)
 
 
 //                binding.menuBox.animate().alpha(1)
