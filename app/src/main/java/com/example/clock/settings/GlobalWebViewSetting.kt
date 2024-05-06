@@ -15,10 +15,10 @@ import com.example.clock.R
 import com.example.clock.SettingsFragment
 import com.example.clock.SiteSettingsFragment
 import com.example.clock.internal.J
-import com.example.clock.ui.model.UserScript
 import com.example.clock.ui.main.UserScriptFragment
 import com.example.clock.ui.model.BookMark
 import com.example.clock.ui.model.SiteSetting
+import com.example.clock.ui.model.UserScript
 import com.example.clock.utils.DNSClient
 import com.example.clock.utils.readNBytesC
 import kotlinx.coroutines.Dispatchers
@@ -99,6 +99,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
 
     var user_agent = ""
     var pc_user_agent = ""
+    var custom_user_agent = ""
     lateinit var dnsClient: DNSClient
     val inner_home_page = "file:///android_asset/homepage/index.html"
     var home_page = "https://cn.bing.com/"
@@ -308,10 +309,51 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                     J.concat(context.packageName, "_preferences"),
                     FragmentActivity.MODE_PRIVATE
                 ).let {
-                    home_page = it.getString("signature", null) ?: home_page
-                    search_url = it.getString(::search_url.name, null) ?: search_url
-                    start_page = it.getString(::start_page.name, null) ?: start_page
-                    user_agent = it.getString(::user_agent.name, null) ?: user_agent
+                    val editor = it.edit()
+                    home_page = it.getString(::home_page.name, null).let {
+                        if (it.isNullOrBlank()) {
+                            editor.putString(::home_page.name, home_page)
+                            home_page
+                        } else {
+                            it
+                        }
+                    }
+                    search_url = it.getString(::search_url.name, null).let {
+                        if (it.isNullOrBlank()) {
+                            editor.putString(::search_url.name, search_url)
+                            search_url
+                        } else {
+                            it
+                        }
+                    }
+
+                    start_page = it.getString(::start_page.name, null).let {
+                        if (it.isNullOrBlank()) {
+                            editor.putString(::start_page.name, start_page)
+                            start_page
+                        } else {
+                            it
+                        }
+                    }
+
+                    custom_user_agent = it.getString(::custom_user_agent.name, null) ?: ""
+
+                    user_agent = it.getString(::user_agent.name, null).let {
+                        if (it.isNullOrBlank()) {
+                            editor.putString(::user_agent.name, user_agent)
+                            user_agent
+                        } else {
+                            if (it.isNotBlank()
+                                && it == context.resources.getStringArray(
+                                    R.array.user_agent_values
+                                ).last()
+                            ) {
+                                custom_user_agent
+                            } else {
+                                it
+                            }
+                        }
+                    }
                     can_copy = it.getBoolean(::can_copy.name, can_copy)
                     enable_debug = it.getBoolean(::enable_debug.name, enable_debug)
                     proxy_prefix_url =
@@ -337,13 +379,28 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                         dnsClient = DNSClient(context, s, port.toInt())
                     }
 
-                    val customDnsList = it.getString(::custom_dns_list.name, null) ?: ""
-                    customDnsList.lineSequence().forEach {
-                        custom_dns_list.add(it)
-                    }
                     enable_replace = it.getBoolean(::enable_replace.name, enable_replace)
+
+                    editor.apply()
                 }
 
+            }
+
+            val f = async {
+                val f =
+                    File(context.getExternalFilesDir(null), CUSTOM_DNS_LIST_FILE)
+                if (!f.exists()) {
+                    f.createNewFile()
+                }
+                f.inputStream().use { input ->
+                    input.bufferedReader().use {
+                        it.lines().forEach {
+                            if (it.isNotBlank()) {
+                                custom_dns_list.add(it)
+                            }
+                        }
+                    }
+                }
             }
 
             val a = async {
@@ -439,6 +496,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
             c.await()
             d.await()
             e.await()
+            f.await()
         }
     }
 
@@ -490,19 +548,60 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                             "${context.packageName}_preferences",
                             FragmentActivity.MODE_PRIVATE
                         ).let {
-
-                            if (keys.contains("signature")) home_page =
-                                it.getString("signature", null) ?: home_page
+                            val editor = it.edit()
+                            if (keys.contains(::home_page.name)) home_page =
+                                it.getString(::home_page.name, null).let {
+                                    if (it.isNullOrBlank()) {
+                                        editor.putString(::home_page.name, home_page)
+                                        home_page
+                                    } else {
+                                        it
+                                    }
+                                }
                             if (keys.contains(::search_url.name)) search_url =
-                                it.getString(::search_url.name, null) ?: search_url
+                                it.getString(::search_url.name, null).let {
+                                    if (it.isNullOrBlank()) {
+                                        editor.putString(::search_url.name, search_url)
+                                        search_url
+                                    } else {
+                                        it
+                                    }
+                                }
                             if (keys.contains(::start_page.name)) {
                                 start_page =
-                                    it.getString(::start_page.name, null) ?: start_page
+                                    it.getString(::start_page.name, null).let {
+                                        if (it.isNullOrBlank()) {
+                                            editor.putString(::start_page.name, start_page)
+                                            start_page
+                                        } else {
+                                            it
+                                        }
+                                    }
                                 INIT_URI = start_page
                             }
+
+                            if (keys.contains(::custom_user_agent.name)) {
+                                custom_user_agent = it.getString("custom_user_agent", null) ?: ""
+                            }
+
                             if (keys.contains(::user_agent.name)) {
                                 user_agent =
-                                    it.getString(::user_agent.name, null) ?: user_agent
+                                    it.getString(::user_agent.name, null).let {
+                                        if (it.isNullOrBlank()) {
+                                            editor.putString(::user_agent.name, user_agent)
+                                            user_agent
+                                        } else {
+                                            if (it.isNotBlank()
+                                                && it == context.resources.getStringArray(
+                                                    R.array.user_agent_values
+                                                ).last()
+                                            ) {
+                                                custom_user_agent
+                                            } else {
+                                                it
+                                            }
+                                        }
+                                    }
 //
 //                            val h = holderController.currentGroup.getCurrent()
 //                                ?: throw KotlinNullPointerException()
@@ -541,6 +640,8 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                             if (keys.contains(::can_copy.name)) {
                                 can_copy = it.getBoolean(::can_copy.name, can_copy)
                             }
+
+                            editor.apply()
                         }
                     }
                 }
@@ -624,7 +725,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
         const val REPLACE_RULE_FILE = "replace_rule.txt"
         const val BOOKMARK_FILE = "BOOKMARK_FILE.json"
         const val SITE_SETTINGS_FILE = "SITE_SETTINGS.json"
-
+        const val CUSTOM_DNS_LIST_FILE = "CUSTOM_DNS_LIST.txt"
 
         fun parseUserScriptFile(buf: ByteArray, arr: MutableMap<String, String>) {
 

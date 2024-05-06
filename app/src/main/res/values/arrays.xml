@@ -17,6 +17,7 @@
         <item>MAC Safari</item>
         <item>GoogleBot PC</item>
         <item>BaiduSpider PC</item>
+        <item>Custom UA</item>
     </string-array>
 
     <string-array name="user_agent_values">
@@ -27,6 +28,7 @@
         <item>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15</item>
         <item>Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/99.5.8.632 Safari/537.36</item>
         <item>Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)</item>
+        <item>CUSTOM_UA</item>
     </string-array>
 
 </resources>

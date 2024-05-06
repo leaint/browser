@@ -224,6 +224,10 @@ class SettingsActivity : ComponentActivity(), PreferenceFragment.OnPreferenceSta
                 UserScriptFragment.newInstance()
             }
 
+            "custom_dns_list" -> {
+                EditFileFragment.newInstance(GlobalWebViewSetting.CUSTOM_DNS_LIST_FILE)
+            }
+
             else -> return false
         }
 

@@ -12,7 +12,7 @@
     <string name="title_activity_settings">设置</string>
     <string name="messages_header">消息</string>
     <string name="sync_header">同步</string>
-    <string name="signature_title">主页</string>
+    <string name="home_page_title">主页</string>
     <string name="search_url">搜索地址</string>
     <string name="start_page">起始页地址</string>
     <string name="user_agent">用户代理字符串</string>
@@ -48,4 +48,5 @@
     <string name="using_inner_proxy_title">使用内部代理</string>
     <string name="allow_auto_redirect">允许自动跳转</string>
     <string name="clear_history">清除历史纪录</string>
+    <string name="custom_user_agent_title">自定义用户代理字符串</string>
 </resources>

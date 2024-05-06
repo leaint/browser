@@ -2,9 +2,9 @@
 
     <PreferenceCategory android:title="@string/basic_header">
 
-        <EditTextPreference
-            android:key="signature"
-            android:title="@string/signature_title" />
+<!--        <EditTextPreference-->
+<!--            android:key="home_page"-->
+<!--            android:title="@string/home_page_title" />-->
 
         <EditTextPreference
             android:key="search_url"
@@ -14,11 +14,9 @@
             android:key="start_page"
             android:title="@string/start_page" />
 
-
-        <!--        <EditTextPreference-->
-        <!--            android:key="user_agent"-->
-        <!--            android:title="@string/user_agent"-->
-        <!--             />-->
+        <EditTextPreference
+            android:key="custom_user_agent"
+            android:title="@string/custom_user_agent_title" />
 
         <ListPreference
             android:entries="@array/user_agent_keys"
@@ -69,9 +67,11 @@
             android:key="dns_config"
             android:title="@string/dns_config_title" />
 
-        <EditTextPreference
+        <Preference
+            android:fragment="com.example.clock.ui.main.EditFileFragment"
             android:key="custom_dns_list"
-            android:title="@string/custom_dns_title" />
+            android:title="@string/custom_dns_title"
+            android:widgetLayout="@layout/preference_goto" />
 
         <SwitchPreference
             android:key="using_inner_proxy"
