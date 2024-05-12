@@ -346,7 +346,7 @@ class UIModel(
 
             if (holderController.currentIdx < 0 || holderController.isEmpty()) { // the first new one
 
-                val h = WebViewHolder(setting.INIT_URI, newTask = true)
+                val h = WebViewHolder(setting.start_page, newTask = true)
                 val g = GroupWebViewHolder()
                 g.addTab(h)
                 holderController.add(g)
@@ -465,7 +465,7 @@ class UIModel(
 
             holderController.clear()
 
-            val h = WebViewHolder(setting.INIT_URI, newTask = true)
+            val h = WebViewHolder(setting.start_page, newTask = true)
             val g = GroupWebViewHolder()
             g.addTab(h)
             holderController.add(g)
@@ -508,7 +508,7 @@ class UIModel(
 
             if (holderController.currentIdx < 0 || holderController.isEmpty()) { // the first new one
 
-                val h = WebViewHolder(setting.INIT_URI, newTask = true)
+                val h = WebViewHolder(setting.start_page, newTask = true)
                 val g = GroupWebViewHolder()
                 g.addTab(h)
                 holderController.add(g)
@@ -549,7 +549,7 @@ class UIModel(
     override fun addTab(idx: Int) {
 
         if (idx == -1) {
-            val h = WebViewHolder(setting.INIT_URI, newTask = true)
+            val h = WebViewHolder(setting.start_page, newTask = true)
             val groupHolder = GroupWebViewHolder()
 
             groupHolder.addTab(h)

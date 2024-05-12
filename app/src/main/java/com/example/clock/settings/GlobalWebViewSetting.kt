@@ -110,7 +110,6 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
     var cache_navigation = false
     var allow_go_outside = true
     var allow_auto_redirect = false
-    var INIT_URI = start_page
     var dns_config = "127.0.0.1,20053"
     var custom_dns_list = ArrayList<String>()
     val JUMP_URI = "http://78.jump.to"
@@ -371,8 +370,6 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                         e.printStackTrace()
                     }
 
-
-                    INIT_URI = start_page
                     dns_config = it.getString(::dns_config.name, null) ?: dns_config
                     val dnss = dns_config.split(',')
                     if (dnss.size == 2) {
@@ -582,7 +579,6 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                                             it
                                         }
                                     }
-                                INIT_URI = start_page
                             }
 
                             if (keys.contains(::custom_user_agent.name)) {

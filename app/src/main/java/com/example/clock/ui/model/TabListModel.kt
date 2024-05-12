@@ -106,7 +106,7 @@ fun initTabListModel(
 
         setOnLongClickListener {
             it.animate().translationY(-0.2f * it.height)
-            uiModelListener.newGroupTab(setting.home_page)
+            uiModelListener.newGroupTab(setting.start_page)
             true
         }
     }

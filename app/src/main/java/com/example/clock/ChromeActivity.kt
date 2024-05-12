@@ -229,7 +229,7 @@ class ChromeActivity : FragmentActivity() {
                     WebView.setWebContentsDebuggingEnabled(true)
                 }
             }
-            holderController.currentGroup?.getCurrent()?.loadingUrl = setting.INIT_URI
+            holderController.currentGroup?.getCurrent()?.loadingUrl = setting.start_page
 
             setting.reloadBookMark(this@ChromeActivity)
         }
