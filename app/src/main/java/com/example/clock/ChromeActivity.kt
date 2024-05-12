@@ -863,6 +863,23 @@ class ChromeActivity : FragmentActivity() {
                 setting.isFullScreen = !setting.isFullScreen
                 uiModel.requestFullscreen(setting.isFullScreen)
             }
+
+            MenuEnum.SCRIPT.ordinal -> {
+                AlertDialog.Builder(this).apply {
+                    setTitle(MenuEnum.SCRIPT.title)
+                    if(setting.scriptTool.isEmpty()) {
+                        setMessage("（没有添加过脚本）")
+                        setPositiveButton(android.R.string.cancel, null)
+                    } else {
+                        setItems(setting.scriptTool.map {
+                            it.name
+                        }.toTypedArray()) { _, which ->
+                            holderController.currentGroup?.getCurrent()?.webView?.get()
+                                ?.evaluateJavascript(setting.scriptTool[which].content, null)
+                        }
+                    }
+                }.show()
+            }
         }
 
         binding.menuBox.animate().alpha(0f).apply {

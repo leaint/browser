@@ -21,5 +21,6 @@ enum class MenuEnum(val title: String, val icon: Int) {
     SITE_SETTING("本站设置", R.drawable.outline_video_settings_24),
     EXIT("退出App", R.drawable.outline_exit_to_app_24),
 
-    FULL_SCREEN("全屏", R.drawable.outline_fullscreen_24)
+    FULL_SCREEN("全屏", R.drawable.outline_fullscreen_24),
+    SCRIPT("脚本", R.drawable.outline_javascript_24)
 }

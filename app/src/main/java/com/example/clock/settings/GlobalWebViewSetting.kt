@@ -91,6 +91,7 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
     var ad_rule = HashMap<String, String>()
     var block_rule = ArraySet<String>()
     var userscriptMap = ArrayMap<String, UserScript>()
+    var scriptTool = emptyArray<UserScript>()
     var siteSettings = HashMap<String, SiteSetting>()
     var siteSettingsChanged = false
     var replace_rule = HashMap<String, String>()
@@ -435,7 +436,11 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                         run {
                             val buf = Files.readAllBytes(f.toPath())
 
-                            parseUserScript(buf, userscriptMap)
+                            val globalScriptArr = ArrayMap<String, MutableSet<UserScript>>()
+                            parseUserScript(buf, userscriptMap, globalScriptArr)
+                            globalScriptArr.get("<toolbar>")?.let {
+                                scriptTool = it.toTypedArray()
+                            }
 //                            val obj = parseJSONObjectNullable(input) ?: JSONObject().apply {
 //                                putArray("user_script")
 //                            }
@@ -750,7 +755,14 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
         }
 
 
-        fun parseUserScript(buf: ByteArray, arr: MutableMap<String, UserScript>) {
+        fun parseUserScript(buf: ByteArray, arr: MutableMap<String, UserScript>, globalArr:MutableMap<String, MutableSet<UserScript>>) {
+
+            var jscriptToolArr = globalArr["<toolbar>"]
+
+            if (jscriptToolArr == null) {
+                jscriptToolArr = ArraySet()
+                globalArr["<toolbar>"] = jscriptToolArr
+            }
 
             try {
                 JsonReader(buf.inputStream().reader()).use {
@@ -759,8 +771,14 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                             "user_script" -> {
                                 obj { k ->
                                     UserScript.parse(nextString())?.let {
-                                        if (it.namespace != "off") it.match.forEach { match ->
-                                            arr[match] = it
+                                        if (it.namespace != "off") {
+                                            if(it.match.size == 1 && it.match.contains("<toolbar>")) {
+                                                jscriptToolArr.add(it)
+                                            } else {
+                                                it.match.forEach { match ->
+                                                    arr[match] = it
+                                                }
+                                            }
                                         }
                                     }
                                 }
