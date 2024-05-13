@@ -162,6 +162,8 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                 "return format(cur)}\n" +
                 "function getCur(){return format(cur)}"
 
+    val pc_mode_js = "(()=>{ let meta = document.createElement('meta');meta.name ='viewport';meta.content='minimum-scale=0.1, initial-scale=0.1, maximum-scale=10, user-scalable=yes';document.head.appendChild(meta); })();"
+
     var externalFilesDir: File? = null
     var externalCacheDir: File? = null
     var externalIconCacheDir: File? = null

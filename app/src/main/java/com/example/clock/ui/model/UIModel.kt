@@ -990,6 +990,10 @@ class UIModel(
 
         val webViewHolder = holderController.findHolder(tag) ?: return
 
+        if(webViewHolder.pc_mode) {
+            webViewHolder.webView?.get()?.evaluateJavascript(setting.pc_mode_js, null)
+        }
+
         webViewHolder.change(WebViewHolder.UPDATE_LOADING_STATUS) {
             it.isLoading = false
         }
