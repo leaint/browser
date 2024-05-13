@@ -1,15 +1,18 @@
 package com.example.clock.ui.main
 
+import android.app.AlertDialog
 import android.database.DataSetObserver
 import android.os.Bundle
 import android.util.JsonWriter
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -218,11 +221,47 @@ class BookmarkFragment : Fragment() {
                 when (item.itemId) {
                     0 -> {
 
+                        AlertDialog.Builder(context).apply {
+
+                            setTitle("Edit Bookmark")
+                            setView(R.layout.edit_bookmark_dialog)
+                            setPositiveButton(android.R.string.ok) { dialog, _ ->
+                                run {
+
+                                    val alertDialog = dialog as AlertDialog
+                                    val a = alertDialog.findViewById<EditText>(R.id.title_edittext)
+                                    val b = alertDialog.findViewById<EditText>(R.id.url_edittext)
+
+                                    if (a != null && b != null && a.text.isNotBlank() && b.text.isNotBlank()) {
+
+                                        bookMarks[info.position].title = a.text.toString()
+                                        bookMarks[info.position].url = b.text.toString()
+                                        bookmarkChanged = true
+                                        adapter5?.notifyDataSetChanged()
+                                    }
+                                }
+                            }
+                            setNegativeButton(android.R.string.cancel, null)
+                        }.create().apply {
+
+                            setOnShowListener {
+                                findViewById<EditText>(R.id.title_edittext)?.setText(bookMarks[info.position].title)
+                                findViewById<EditText>(R.id.url_edittext)?.setText(bookMarks[info.position].url)
+                            }
+
+                        }.show()
                     }
 
                     1 -> {
-                        bookMarks.removeAt(info.position)
-                        adapter5?.notifyDataSetChanged()
+                        AlertDialog.Builder(context).apply {
+                            setTitle("确定要删除此书签吗？")
+                            setIconAttribute( android.R.attr.alertDialogIcon)
+                            setPositiveButton(android.R.string.ok) {_,_-> run{
+                                bookMarks.removeAt(info.position)
+                                adapter5?.notifyDataSetChanged()
+                            }}
+                            setNegativeButton(android.R.string.cancel, null)
+                        }.show()
                     }
 
                     2 -> {

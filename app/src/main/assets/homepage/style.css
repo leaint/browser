@@ -172,6 +172,8 @@ button#to-search:active {
 div#hh {
     flex-grow: 1;
     max-height: 22vh;
+    display: flex;
+    justify-content: flex-end;
 }
 
 div#bb {
@@ -182,14 +184,23 @@ html {
     height: 100%;
 }
 
-#edit {
-    text-align: right;
-    margin-left: auto;
+#cancel {
+    visibility: hidden;
+}
+.editing #cancel {
+    visibility: visible;
+    color: black;
+}
+
+#edit, #cancel {
     color: #80808088;
     padding: 1em;
-    width: fit-content;
     user-select:none;
+    margin-left: 1em;
+}
 
+.editing #edit {
+    color: black;
 }
 
 .edititem {

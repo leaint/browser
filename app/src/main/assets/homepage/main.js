@@ -320,3 +320,18 @@ editBtn?.addEventListener('click',()=>{
         AndroidJSInterface.setBookMarks(JSON.stringify(bookmarks))
     }
 })
+
+let cancelBtn = document.querySelector('#cancel')
+
+cancelBtn?.addEventListener('click', ()=> {
+    editIng = false
+    document.body.classList.toggle('editing', editIng)
+    editBtn.textContent = editIng ? 'OK': 'O'
+
+    resetForm();
+
+    if(changed) {
+        bookmarks = JSON.parse(AndroidJSInterface.getBookMarks() || "{}")
+        updateBookmarks(bookmarks.bookmarks)
+    }
+})
