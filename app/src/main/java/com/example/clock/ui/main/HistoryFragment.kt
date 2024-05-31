@@ -280,7 +280,7 @@ class HistoryFragment : Fragment() {
                                             "一天内",
                                             "一周内",
                                             "三十天内",
-                                            "六十天前",
+                                            "超过三十天",
                                             "全部时间"
                                         ),
                                         0
@@ -293,7 +293,7 @@ class HistoryFragment : Fragment() {
                                                 3 -> 30 * 24
                                                 4 -> {
                                                     invert = true
-                                                    60 * 24
+                                                    30 * 24
                                                 }
                                                 5 -> -1
                                                 else -> 0

@@ -19,7 +19,6 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.RoundedCorner
 import android.view.View
-import android.view.View.OnAttachStateChangeListener
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowInsets
@@ -271,6 +270,18 @@ class ChromeActivity : FragmentActivity() {
             run {
 //                window.insetsController?.hide(WindowInsets.Type.navigationBars() or WindowInsets.Type.statusBars())
 
+                val isPadding = binding.loadingBar.paddingLeft != 0
+                val isStatusBarVisible =
+                    v.rootWindowInsets.isVisible(WindowInsets.Type.statusBars())
+                if (isStatusBarVisible && isPadding) {
+                    binding.loadingBar.setPadding(0, 0, 0, 0)
+                } else if (!isStatusBarVisible && !isPadding) {
+                    v.rootWindowInsets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)?.let {
+                        binding.loadingBar.setPadding(it.center.x / 3 * 2, 0, it.center.x, 0)
+                    }
+                }
+
+
                 if ((v.layoutParams as MarginLayoutParams).bottomMargin != insets.getInsets(
                         WindowInsets.Type.ime()
                     ).bottom
@@ -285,18 +296,6 @@ class ChromeActivity : FragmentActivity() {
                 }
             }
         }
-
-        binding.loadingBar.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View) {
-                if (!v.rootWindowInsets.isVisible(WindowInsets.Type.statusBars())) {
-                    v.rootWindowInsets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)?.let {
-                        v.setPadding(it.center.x / 3 * 2, 0, it.center.x, 0)
-                    }
-                }
-            }
-
-            override fun onViewDetachedFromWindow(v: View) {}
-        })
 
         val videoToolBarModel = VideoToolBarModel()
         val fullScreenContainerModel = FullScreenContainerModel()
@@ -766,9 +765,9 @@ class ChromeActivity : FragmentActivity() {
                                     1, WebViewTransport(
                                         LoadDataUrl(
                                             null,
-                                            "<html><head><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css\">\n" +
-                                                    "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js\"></script>\n" +
-                                                    "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js\"></script>\n</head><body><div><label >Line wrap<input id=\"line-wrap-control\" onchange=\"onWrap(this)\" type=\"checkbox\" aria-label=\"Line wrap\"></label></div><pre><code class=\"language-html\"></code></pre><xmp id=\"temp\" type=\"text/html\">" + s + "</xmp><script>let pre=document.querySelector('pre');function onWrap(e){if(e.checked){pre.style.whiteSpace = 'pre-wrap';pre.style.overflowWrap='anywhere';}else{pre.style.whiteSpace = 'pre';pre.style.overflowWrap='';}};let a = document.querySelector('code');let b = document.querySelector('#temp'); a.textContent = b.innerHTML;b.remove(); hljs.highlightAll();</script></body></html>",
+                                            "<html><head><link rel=\"stylesheet\" href=\"file:///android_asset/others/highlight.js-11.9.0/default.min.css\">\n" +
+                                                    "<script src=\"file:///android_asset/others/highlight.js-11.9.0/highlight.min.js\"></script>\n" +
+                                                    "<script src=\"file:///android_asset/others/highlight.js-11.9.0/javascript.min.js\"></script>\n</head><body><div><label >Line wrap<input id=\"line-wrap-control\" onchange=\"onWrap(this)\" type=\"checkbox\" aria-label=\"Line wrap\"></label></div><pre><code class=\"language-html\"></code></pre><xmp id=\"temp\" type=\"text/html\">" + s + "</xmp><script>let pre=document.querySelector('pre');function onWrap(e){if(e.checked){pre.style.whiteSpace = 'pre-wrap';pre.style.overflowWrap='anywhere';}else{pre.style.whiteSpace = 'pre';pre.style.overflowWrap='';}};let a = document.querySelector('code');let b = document.querySelector('#temp'); a.textContent = b.innerHTML;b.remove(); hljs.highlightAll();</script></body></html>",
                                             "text/html",
                                             null,
                                             null

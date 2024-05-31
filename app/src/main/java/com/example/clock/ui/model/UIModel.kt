@@ -16,6 +16,7 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import android.webkit.WebChromeClient
 import android.webkit.WebView.FindListener
 import android.widget.TextView
 import android.widget.Toast
@@ -73,7 +74,7 @@ interface UIModelListener : FindListener {
     fun goToSpecialURL(url: String)
     fun clearForwardTab(tag: Int)
     fun restoreTabGroup()
-    fun setFullScreenViewStatus(view: View?, hidden: Boolean)
+    fun setFullScreenViewStatus(view: View?, hidden: Boolean, callback: WebChromeClient.CustomViewCallback?)
     fun updateUI(isNative: Boolean = false)
     fun updateUI(
         h: WebViewHolder, g: GroupWebViewHolder,
@@ -126,6 +127,9 @@ class UIModel(
         }
 
     private var _isFullScreen = true
+
+    private var isFullScreenViewShow = false
+    private var hideFullScreenViewCallback:WebChromeClient.CustomViewCallback? = null
 
     override fun updateUI(
         h: WebViewHolder, g: GroupWebViewHolder, @UpdateType changedType: Int, isNative: Boolean
@@ -282,6 +286,11 @@ class UIModel(
     }
 
     override fun goBackOrClose(): Boolean {
+
+        if(isFullScreenViewShow) {
+            hideFullScreenViewCallback?.onCustomViewHidden()
+            return true
+        }
 
         if(supportFragmentManager.isStateSaved)  {
             return true
@@ -727,7 +736,10 @@ class UIModel(
     }
 
 
-    override fun setFullScreenViewStatus(view: View?, hidden: Boolean) {
+    override fun setFullScreenViewStatus(view: View?, hidden: Boolean, callback: WebChromeClient.CustomViewCallback?) {
+        isFullScreenViewShow = !hidden
+        hideFullScreenViewCallback = callback
+
         if (hidden) {
             fullScreenContainerModel.exitFullScreen()
             if (!setting.isFullScreen) {

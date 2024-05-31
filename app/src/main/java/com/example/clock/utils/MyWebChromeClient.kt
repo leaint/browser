@@ -35,11 +35,11 @@ class MyWebChromeClient(
     }
 
     override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
-        uiModelListener.setFullScreenViewStatus(view, false)
+        uiModelListener.setFullScreenViewStatus(view, false, callback)
     }
 
     override fun onHideCustomView() {
-        uiModelListener.setFullScreenViewStatus(null, true)
+        uiModelListener.setFullScreenViewStatus(null, true, null)
     }
 
     override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
