@@ -69,4 +69,5 @@
     <string name="allow_auto_redirect">Allow auto redirect</string>
     <string name="clear_history">Clear history</string>
     <string name="custom_user_agent_title">Custom User Agent</string>
+    <string name="no_js_title">Disable JavaScript</string>
 </resources>

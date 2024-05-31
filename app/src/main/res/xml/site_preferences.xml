@@ -34,5 +34,10 @@
             android:key="allow_auto_redirect"
             android:title="@string/allow_auto_redirect" />
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="no_js"
+            android:title="@string/no_js_title" />
+
     </PreferenceCategory>
 </PreferenceScreen>

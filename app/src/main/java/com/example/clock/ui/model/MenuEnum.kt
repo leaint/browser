@@ -22,5 +22,6 @@ enum class MenuEnum(val title: String, val icon: Int) {
     EXIT("退出App", R.drawable.outline_exit_to_app_24),
 
     FULL_SCREEN("全屏", R.drawable.outline_fullscreen_24),
-    SCRIPT("脚本", R.drawable.outline_javascript_24)
+    SCRIPT("脚本", R.drawable.outline_javascript_24),
+    IMAGE_MODE("无图模式", R.drawable.outline_hide_image_24),
 }

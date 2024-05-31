@@ -214,6 +214,9 @@ class WebviewFragment : Fragment() {
 //                    allowFileAccess = true
 //            disabledActionModeMenuItems = WebSettings.MENU_ITEM_PROCESS_TEXT
 //            builtInZoomControls = false
+                    if(globalWebViewSetting.noImageMode) {
+                        blockNetworkImage = true
+                    }
                 }
 
 //                setLayerType(View.LAYER_TYPE_HARDWARE, null)

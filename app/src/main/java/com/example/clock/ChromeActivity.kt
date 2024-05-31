@@ -57,6 +57,7 @@ import com.example.clock.ui.model.MainMenuModel
 import com.example.clock.ui.model.MenuEnum
 import com.example.clock.ui.model.NavigationChangedModel
 import com.example.clock.ui.model.SearchModel
+import com.example.clock.ui.model.SiteSetting
 import com.example.clock.ui.model.TabListModel
 import com.example.clock.ui.model.ToolBarModel
 import com.example.clock.ui.model.UIModel
@@ -454,6 +455,13 @@ class ChromeActivity : FragmentActivity() {
                         "Book it"
                     }
                 }
+                set(MenuEnum.IMAGE_MODE.ordinal) { h, view ->
+                    view.text = if (setting.noImageMode) {
+                        "无图模式"
+                    } else {
+                        "有图模式"
+                    }
+                }
                 set(MenuEnum.PC_MODE.ordinal) { h, view ->
                     view.setTextColor(
                         if (h.pc_mode) {
@@ -610,6 +618,7 @@ class ChromeActivity : FragmentActivity() {
                             .putExtra("enabled", siteSetting != null)
                             .putExtra(setting::cache_navigation.name, cacheNavigation)
                             .putExtra(setting::allow_go_outside.name, allowGoOutSite)
+                            .putExtra(SiteSetting::no_js.name, siteSetting?.no_js ?: false)
                     )
                 }
             }
@@ -878,6 +887,12 @@ class ChromeActivity : FragmentActivity() {
                         }
                     }
                 }.show()
+            }
+
+            MenuEnum.IMAGE_MODE.ordinal -> {
+                setting.noImageMode = !setting.noImageMode
+                val noImageModeStr = if (setting.noImageMode) "无图模式" else "有图模式"
+                Toast.makeText(this, noImageModeStr, Toast.LENGTH_SHORT).show()
             }
         }
 

@@ -99,6 +99,11 @@ fun initFragment(
         ignore {
             val u = Uri.parse(h.loadingUrl)
             val ua = setting.siteSettings[u.authority]?.user_agent
+            val no_js = setting.siteSettings[u.authority]?.no_js == true
+
+            if (no_js) {
+                it.settings.javaScriptEnabled = false
+            }
 
             if (ua != null) {
                 if (it.settings.userAgentString != ua) {

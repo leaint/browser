@@ -49,4 +49,5 @@
     <string name="allow_auto_redirect">允许自动跳转</string>
     <string name="clear_history">清除历史纪录</string>
     <string name="custom_user_agent_title">自定义用户代理字符串</string>
+    <string name="no_js_title">禁用脚本</string>
 </resources>

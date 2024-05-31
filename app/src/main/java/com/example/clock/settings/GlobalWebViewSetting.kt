@@ -120,6 +120,8 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
     var proxy_prefix_url = ""
     var using_inner_proxy = false
 
+    var noImageMode = false
+
     var useProxy = false
         get() = using_inner_proxy && proxy_prefix_url.isNotEmpty()
 
@@ -532,10 +534,13 @@ class GlobalWebViewSetting(private val lifecycleOwner: LifecycleOwner, context: 
                                             it.getBoolean(SiteSetting::cache_navigation.name, false)
                                     } else if (SiteSetting::allow_go_outside.name in keys) {
                                         thisSiteSetting.allow_go_outside =
-                                            it.getBoolean(::allow_go_outside.name, true)
+                                            it.getBoolean(SiteSetting::allow_go_outside.name, true)
                                     } else if (SiteSetting::allow_auto_redirect.name in keys) {
                                         thisSiteSetting.allow_auto_redirect =
-                                            it.getBoolean(::allow_auto_redirect.name, false)
+                                            it.getBoolean(SiteSetting::allow_auto_redirect.name, false)
+                                    } else if (SiteSetting::no_js.name in keys) {
+                                        thisSiteSetting.no_js =
+                                            it.getBoolean(SiteSetting::no_js.name, false)
                                     } else {
                                         Unit
                                     }
