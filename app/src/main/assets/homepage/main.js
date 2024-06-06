@@ -335,3 +335,43 @@ cancelBtn?.addEventListener('click', ()=> {
         updateBookmarks(bookmarks.bookmarks)
     }
 })
+
+let cityCode = parseInt(localStorage.getItem('city_code')) || 54511
+let cityName = ''
+
+function selectCity() {
+
+    let localCityCode = parseInt(prompt("City Code:" + cityName, cityCode))
+    if(!isNaN(localCityCode)) {
+        cityCode = localCityCode;
+        localStorage.setItem('city_code', cityCode);
+        localStorage.setItem('weather_time', 0);
+        cityName = '';
+        updateWeather();
+    }
+}
+
+function updateWeather() {
+
+    document.querySelector('#weather')?.remove();
+
+    let date = new Date(+localStorage.getItem('weather_time'));
+
+    let data
+
+    if(Date.now() - date < 1800_000) {
+        data = Promise.resolve(JSON.parse(localStorage.getItem('weather_data')))
+    } else {
+        data = fetch(`http://www.nmc.cn/rest/real/${cityCode}?_=${Date.now()}`).then(r=>r.json())
+    }
+
+    data.then(a=> {
+        let p='http://image.nmc.cn/assets/img/w/40x40/3/';
+        document.querySelector('#hh').insertAdjacentHTML('afterbegin',`<div id="weather" onclick="selectCity()" style="flex-grow:1;align-self:end;"><img src="${p+a.weather.img}.png"> <div>${a.weather.info} ${a.weather.feelst} <small><sup>℃</sup></small> <small>💧</small>${a.weather.humidity}%</div></div>`);
+        localStorage.setItem('weather_data', JSON.stringify(a));
+        localStorage.setItem('weather_time', Date.now());
+        cityName = a.station.city;
+    });
+}
+
+updateWeather();
